@@ -1,0 +1,315 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Healthcare Analytics Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .analytics-dashboard {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+    
+    .dashboard-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+        overflow: hidden;
+    }
+    
+    .stat-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.5rem;
+        text-align: center;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+    }
+    
+    .stat-card h3 {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        font-weight: bold;
+    }
+    
+    .stat-card p {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        margin-bottom: 0;
+    }
+    
+    .chart-container {
+        position: relative;
+        height: 400px;
+        padding: 1rem;
+    }
+    
+    .filter-controls {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .activity-feed {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    
+    .activity-item {
+        padding: 0.75rem;
+        border-bottom: 1px solid #f0f0f0;
+        transition: all 0.3s ease;
+    }
+    
+    .activity-item:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .activity-time {
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="analytics-dashboard">
+    <div class="container">
+        <!-- Header Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="text-white text-center mb-4">Healthcare Analytics Dashboard</h1>
+                <p class="text-white text-center opacity-75">Real-time insights into your healthcare management system</p>
+            </div>
+        </div>
+        
+        <!-- Statistics Cards -->
+        <div class="row" id="stats-container">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <h3 id="total-patients">{{ stats.total_patients|default:0 }}</h3>
+                    <p>Total Patients</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <h3 id="total-doctors">{{ stats.total_doctors|default:0 }}</h3>
+                    <p>Total Doctors</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <h3 id="total-appointments">{{ stats.total_appointments|default:0 }}</h3>
+                    <p>Total Appointments</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <h3 id="pending-appointments">{{ stats.pending_appointments|default:0 }}</h3>
+                    <p>Pending Appointments</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Charts Section -->
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="dashboard-card">
+                    <div class="filter-controls">
+                        <h5 class="mb-3">Appointment Trends</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <select class="form-control" id="time-period" hx-get="/dashboard/chart-data/" hx-target="#appointment-chart-container" hx-trigger="change">
+                                    <option value="week">Last 7 Days</option>
+                                    <option value="month" selected>Last 30 Days</option>
+                                    <option value="quarter">Last 3 Months</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <select class="form-control" id="chart-type" hx-get="/dashboard/chart-data/" hx-target="#appointment-chart-container" hx-trigger="change">
+                                    <option value="line">Line Chart</option>
+                                    <option value="bar">Bar Chart</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-container" id="appointment-chart-container">
+                        <canvas id="appointmentChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4">
+                <div class="dashboard-card">
+                    <div class="filter-controls">
+                        <h5 class="mb-0">Appointment Status Distribution</h5>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Secondary Charts -->
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="dashboard-card">
+                    <div class="filter-controls">
+                        <h5 class="mb-0">Doctor Specializations</h5>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="specializationChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6">
+                <div class="dashboard-card">
+                    <div class="filter-controls">
+                        <h5 class="mb-3">Recent Activity</h5>
+                        <button class="btn btn-sm btn-outline-primary" hx-get="/dashboard/recent-activity/" hx-target="#activity-feed" hx-trigger="click">
+                            <i class="fas fa-refresh"></i> Refresh
+                        </button>
+                    </div>
+                    <div class="activity-feed" id="activity-feed">
+                        {% include 'partials/activity_feed.html' %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="row">
+            <div class="col-12">
+                <div class="dashboard-card">
+                    <div class="filter-controls">
+                        <h5 class="mb-3">Quick Actions</h5>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <button class="btn btn-primary w-100 mb-2" hx-get="/appointments/quick-add/" hx-target="#quick-action-modal" hx-trigger="click" data-bs-toggle="modal" data-bs-target="#quickActionModal">
+                                    <i class="fas fa-plus"></i> New Appointment
+                                </button>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-success w-100 mb-2" hx-get="/patients/quick-add/" hx-target="#quick-action-modal" hx-trigger="click" data-bs-toggle="modal" data-bs-target="#quickActionModal">
+                                    <i class="fas fa-user-plus"></i> Add Patient
+                                </button>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-info w-100 mb-2" hx-get="/medical-records/quick-add/" hx-target="#quick-action-modal" hx-trigger="click" data-bs-toggle="modal" data-bs-target="#quickActionModal">
+                                    <i class="fas fa-file-medical"></i> New Record
+                                </button>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-warning w-100 mb-2" hx-get="/dashboard/export-data/" hx-trigger="click">
+                                    <i class="fas fa-download"></i> Export Data
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Action Modal -->
+<div class="modal fade" id="quickActionModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" id="quick-action-modal">
+            <!-- Dynamic content loaded here -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/htmx.org@1.9.6"></script>
+<script>
+    // Initialize Chart.js charts
+    document.addEventListener('DOMContentLoaded', function() {
+        // Appointment Trends Chart
+        const appointmentCtx = document.getElementById('appointmentChart').getContext('2d');
+        const appointmentChart = new Chart(appointmentCtx, {
+            type: 'line',
+            data: {
+                labels: {{ chart_data.appointment_labels|safe }},
+                datasets: [{
+                    label: 'Appointments',
+                    data: {{ chart_data.appointment_data|safe }},
+                    borderColor: '#667eea',
+                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                    borderWidth: 2,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+        
+        // Status Distribution Chart
+        const statusCtx = document.getElementById('statusChart').getContext('2d');
+        const statusChart = new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: {{ chart_data.status_labels|safe }},
+                datasets: [{
+                    data: {{ chart_data.status_data|safe }},
+                    backgroundColor: ['#28a745', '#ffc107', '#dc3545', '#17a2b8'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+        
+        // Specialization Chart
+        const specializationCtx = document.getElementById('specializationChart').getContext('2d');
+        const specializationChart = new Chart(specializationCtx, {
+            type: 'bar',
+            data: {
+                labels: {{ chart_data.specialization_labels|safe }},
+                datasets: [{
+                    label: 'Doctors',
+                    data: {{ chart_data.specialization_data|safe }},
+                    backgroundColor: '#764ba2',
+                    borderColor: '#667eea',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+        
+        // Auto-refresh stats every 30 seconds
+        setInterval(function() {
+            htmx.ajax('GET', '/dashboard/live-stats/', {target: '#stats-container'});
+        }, 30000);
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+
+{% block title %}Reschedule Appointment - HealthCare Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="card-title mb-0">
+                        <i class="fas fa-edit me-2"></i>Reschedule Appointment
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% if appointment %}
+                        <!-- Current Appointment Details -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <h5 class="text-primary">Current Appointment</h5>
+                                <div class="border rounded p-3 bg-light">
+                                    <div class="mb-2">
+                                        <strong>Doctor:</strong> Dr. {{ appointment.doctor.user.first_name }} {{ appointment.doctor.user.last_name }}
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>Date:</strong> {{ appointment.appointment_date|date:"F d, Y" }}
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>Time:</strong> {{ appointment.appointment_time|time:"g:i A" }}
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>Type:</strong> {{ appointment.get_appointment_type_display }}
+                                    </div>
+                                    <div class="mb-0">
+                                        <strong>Reason:</strong> {{ appointment.chief_complaint }}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <h5 class="text-success">New Appointment Details</h5>
+                                <form method="POST" id="rescheduleForm">
+                                    {% csrf_token %}
+                                    <div class="mb-3">
+                                        <label class="form-label">New Date *</label>
+                                        <input type="date" name="new_appointment_date" class="form-control" 
+                                               min="{{ today }}" value="{{ appointment.appointment_date|date:'Y-m-d' }}" required>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label">New Time *</label>
+                                        <select name="new_appointment_time" class="form-select" required>
+                                            <option value="">Select new time...</option>
+                                            <option value="09:00:00" {% if appointment.appointment_time|time:"H:i:s" == "09:00:00" %}selected{% endif %}>09:00 AM</option>
+                                            <option value="10:00:00" {% if appointment.appointment_time|time:"H:i:s" == "10:00:00" %}selected{% endif %}>10:00 AM</option>
+                                            <option value="11:00:00" {% if appointment.appointment_time|time:"H:i:s" == "11:00:00" %}selected{% endif %}>11:00 AM</option>
+                                            <option value="12:00:00" {% if appointment.appointment_time|time:"H:i:s" == "12:00:00" %}selected{% endif %}>12:00 PM</option>
+                                            <option value="14:00:00" {% if appointment.appointment_time|time:"H:i:s" == "14:00:00" %}selected{% endif %}>02:00 PM</option>
+                                            <option value="15:00:00" {% if appointment.appointment_time|time:"H:i:s" == "15:00:00" %}selected{% endif %}>03:00 PM</option>
+                                            <option value="16:00:00" {% if appointment.appointment_time|time:"H:i:s" == "16:00:00" %}selected{% endif %}>04:00 PM</option>
+                                            <option value="17:00:00" {% if appointment.appointment_time|time:"H:i:s" == "17:00:00" %}selected{% endif %}>05:00 PM</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label">Reason for Rescheduling</label>
+                                        <textarea name="reschedule_reason" class="form-control" rows="3" 
+                                                  placeholder="Optional: Let us know why you're rescheduling..."></textarea>
+                                    </div>
+                                    
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" id="confirmReschedule" required>
+                                        <label class="form-check-label" for="confirmReschedule">
+                                            I confirm that I want to reschedule this appointment.
+                                        </label>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex gap-2 justify-content-end">
+                            <a href="{% url 'patients:appointments' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>Cancel
+                            </a>
+                            <button type="submit" form="rescheduleForm" class="btn btn-warning">
+                                <i class="fas fa-edit me-1"></i>Reschedule Appointment
+                            </button>
+                        </div>
+                        
+                    {% else %}
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            Appointment not found or you don't have permission to reschedule this appointment.
+                        </div>
+                        <a href="{% url 'patients:appointments' %}" class="btn btn-primary">
+                            <i class="fas fa-arrow-left me-1"></i>Back to Appointments
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Add some client-side validation
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('rescheduleForm');
+        const dateInput = form.querySelector('input[name="new_appointment_date"]');
+        const timeSelect = form.querySelector('select[name="new_appointment_time"]');
+        
+        // Disable past dates
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.setAttribute('min', today);
+        
+        form.addEventListener('submit', function(e) {
+            const selectedDate = new Date(dateInput.value);
+            const selectedTime = timeSelect.value;
+            
+            if (!selectedDate || !selectedTime) {
+                e.preventDefault();
+                alert('Please select both date and time for the new appointment.');
+                return false;
+            }
+            
+            // Check if it's the same date and time
+            const currentDate = '{{ appointment.appointment_date|date:"Y-m-d" }}';
+            const currentTime = '{{ appointment.appointment_time|time:"H:i:s" }}';
+            
+            if (dateInput.value === currentDate && selectedTime === currentTime) {
+                e.preventDefault();
+                alert('Please select a different date or time for rescheduling.');
+                return false;
+            }
+        });
+    });
+</script>
+{% endblock %}

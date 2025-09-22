@@ -1,0 +1,255 @@
+{% extends 'base.html' %}
+
+{% block title %}Doctor Dashboard - HealthCare Management System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-user-md"></i> Doctor Dashboard</h1>
+    <p class="text-muted">Welcome back, Dr. {{ user.get_full_name|default:user.username }}!</p>
+</div>
+
+<!-- Quick Stats -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div>
+                        <h4 class="mb-0">{{ today_appointments|default:0 }}</h4>
+                        <p class="mb-0">Today's Appointments</p>
+                    </div>
+                    <div class="ms-auto">
+                        <i class="fas fa-calendar-day fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div>
+                        <h4 class="mb-0">{{ total_patients|default:0 }}</h4>
+                        <p class="mb-0">Total Patients</p>
+                    </div>
+                    <div class="ms-auto">
+                        <i class="fas fa-users fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div>
+                        <h4 class="mb-0">{{ pending_appointments|default:0 }}</h4>
+                        <p class="mb-0">Pending Appointments</p>
+                    </div>
+                    <div class="ms-auto">
+                        <i class="fas fa-clipboard-list fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div>
+                        <h4 class="mb-0">{{ completed_appointments|default:0 }}</h4>
+                        <p class="mb-0">Completed Appointments</p>
+                    </div>
+                    <div class="ms-auto">
+                        <i class="fas fa-check-circle fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-bolt"></i> Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <a href="{% url 'doctors:appointments' %}" class="btn btn-primary w-100 py-3">
+                            <i class="fas fa-calendar-check fa-2x d-block mb-2"></i>
+                            View Appointments
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{% url 'doctors:patients' %}" class="btn btn-info w-100 py-3">
+                            <i class="fas fa-users fa-2x d-block mb-2"></i>
+                            My Patients
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{% url 'doctors:schedule' %}" class="btn btn-success w-100 py-3">
+                            <i class="fas fa-calendar-alt fa-2x d-block mb-2"></i>
+                            Manage Schedule
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{% url 'accounts:profile' %}" class="btn btn-warning w-100 py-3">
+                            <i class="fas fa-user-edit fa-2x d-block mb-2"></i>
+                            Update Profile
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Today's Schedule -->
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-clock"></i> Today's Schedule</h5>
+            </div>
+            <div class="card-body">
+                {% if upcoming_appointments %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Patient</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for appointment in upcoming_appointments %}
+                                    <tr {% if appointment.status == 'in_progress' %}class="table-warning"{% endif %}>
+                                        <td>{{ appointment.appointment_time|time:"g:i A" }}</td>
+                                        <td>{{ appointment.patient.user.get_full_name|default:appointment.patient.user.username }}</td>
+                                        <td><span class="badge bg-primary">{{ appointment.get_appointment_type_display }}</span></td>
+                                        <td>
+                                            <span class="badge 
+                                                {% if appointment.status == 'completed' %}bg-success
+                                                {% elif appointment.status == 'in_progress' %}bg-warning
+                                                {% elif appointment.status == 'confirmed' %}bg-info
+                                                {% elif appointment.status == 'scheduled' %}bg-secondary
+                                                {% else %}bg-light text-dark
+                                                {% endif %}">
+                                                {{ appointment.get_status_display }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% if appointment.status == 'completed' %}
+                                                <a href="{% url 'doctors:appointment_detail' appointment.id %}" class="btn btn-sm btn-outline-primary">View Details</a>
+                                            {% elif appointment.status == 'in_progress' %}
+                                                <button class="btn btn-sm btn-success">In Session</button>
+                                            {% else %}
+                                                <a href="{% url 'doctors:appointment_detail' appointment.id %}" class="btn btn-sm btn-outline-primary">Prepare</a>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                        <h5>No Appointments Today</h5>
+                        <p class="text-muted">You have no appointments scheduled for today.</p>
+                    </div>
+                {% endif %}
+                
+                <div class="text-center mt-3">
+                    <a href="{% url 'doctors:appointments' %}" class="btn btn-outline-primary">
+                        View Full Schedule
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-exclamation-triangle"></i> Urgent Tasks</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item d-flex justify-content-between align-items-start">
+                        <div class="ms-2 me-auto">
+                            <div class="fw-bold">Lab Results Review</div>
+                            <small>Patient: Sarah Brown - Blood work results pending review</small>
+                        </div>
+                        <span class="badge bg-danger rounded-pill">High</span>
+                    </div>
+                    
+                    <div class="list-group-item d-flex justify-content-between align-items-start">
+                        <div class="ms-2 me-auto">
+                            <div class="fw-bold">Prescription Renewal</div>
+                            <small>Patient: Michael Lee - Medication expires in 2 days</small>
+                        </div>
+                        <span class="badge bg-warning rounded-pill">Medium</span>
+                    </div>
+                    
+                    <div class="list-group-item d-flex justify-content-between align-items-start">
+                        <div class="ms-2 me-auto">
+                            <div class="fw-bold">Follow-up Required</div>
+                            <small>Patient: Emma Taylor - Post-surgery check scheduled</small>
+                        </div>
+                        <span class="badge bg-info rounded-pill">Normal</span>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-3">
+                    <a href="#" class="btn btn-outline-primary">
+                        View All Tasks
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Patient Statistics -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-bar"></i> This Week</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h4 class="text-primary">32</h4>
+                        <p class="small text-muted">Appointments</p>
+                    </div>
+                    <div class="col-6">
+                        <h4 class="text-success">28</h4>
+                        <p class="small text-muted">Patients Seen</p>
+                    </div>
+                </div>
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h4 class="text-info">45</h4>
+                        <p class="small text-muted">Prescriptions</p>
+                    </div>
+                    <div class="col-6">
+                        <h4 class="text-warning">12</h4>
+                        <p class="small text-muted">Lab Orders</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

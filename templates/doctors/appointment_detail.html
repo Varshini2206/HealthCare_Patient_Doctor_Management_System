@@ -1,0 +1,602 @@
+{% extends 'base.html' %}
+
+{% block title %}Appointment Details - HealthCare Management System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-calendar-check"></i> Appointment Details</h1>
+    <a href="{% url 'doctors:dashboard' %}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Dashboard
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <!-- Appointment Information -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5><i class="fas fa-info-circle"></i> Appointment Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Date:</strong> {{ appointment.appointment_date|date:"F d, Y" }}</p>
+                        <p><strong>Time:</strong> {{ appointment.appointment_time|time:"g:i A" }}</p>
+                        <p><strong>Status:</strong> 
+                            <span class="badge bg-{% if appointment.status == 'confirmed' %}success{% elif appointment.status == 'pending' %}warning{% elif appointment.status == 'completed' %}info{% else %}secondary{% endif %}">
+                                {{ appointment.get_status_display }}
+                            </span>
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Type:</strong> {{ appointment.get_appointment_type_display|default:"General Consultation" }}</p>
+                        <p><strong>Duration:</strong> 30 minutes</p>
+                        <p><strong>Created:</strong> {{ appointment.created_at|date:"M d, Y" }}</p>
+                    </div>
+                </div>
+                
+                {% if appointment.chief_complaint %}
+                <div class="mt-3">
+                    <strong>Chief Complaint:</strong>
+                    <p class="mt-2">{{ appointment.chief_complaint }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Patient Information -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5><i class="fas fa-user"></i> Patient Information</h5>
+                <small class="text-muted">{{ appointment_count }} total appointment{{ appointment_count|pluralize }} with you</small>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Name:</strong> {{ patient.user.get_full_name }}</p>
+                        <p><strong>Patient ID:</strong> {{ patient.patient_id }}</p>
+                        <p><strong>Email:</strong> {{ patient.user.email }}</p>
+                        <p><strong>Phone:</strong> {{ patient.user.phone_number|default:"Not provided" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Date of Birth:</strong> 
+                            {% if patient.user.date_of_birth %}
+                                {{ patient.user.date_of_birth|date:"F d, Y" }}
+                                {% if patient_age %} (Age: {{ patient_age }}){% endif %}
+                            {% else %}
+                                Not provided
+                            {% endif %}
+                        </p>
+                        <p><strong>Gender:</strong> {{ patient.get_gender_display|default:"Not specified" }}</p>
+                        <p><strong>Blood Group:</strong> {{ patient.blood_group|default:"Unknown" }}</p>
+                        <p><strong>Marital Status:</strong> {{ patient.get_marital_status_display|default:"Not specified" }}</p>
+                    </div>
+                </div>
+                
+                <!-- Emergency Contact -->
+                {% if user_profile and user_profile.emergency_contact_name %}
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h6><strong>Emergency Contact:</strong></h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Name:</strong> {{ user_profile.emergency_contact_name }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Phone:</strong> {{ user_profile.emergency_contact_phone|default:"Not provided" }}</p>
+                                <p><strong>Relationship:</strong> {{ user_profile.emergency_contact_relationship|default:"Not specified" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Medical Information -->
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h6><strong>Medical Information:</strong></h6>
+                        
+                        {% if patient.known_allergies %}
+                        <div class="mb-2">
+                            <strong>Known Allergies:</strong>
+                            <p class="mt-1 text-danger">{{ patient.known_allergies }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if patient.chronic_conditions %}
+                        <div class="mb-2">
+                            <strong>Chronic Conditions:</strong>
+                            <p class="mt-1">{{ patient.chronic_conditions }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if patient.current_medications %}
+                        <div class="mb-2">
+                            <strong>Current Medications:</strong>
+                            <p class="mt-1">{{ patient.current_medications }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if patient.family_medical_history %}
+                        <div class="mb-2">
+                            <strong>Family Medical History:</strong>
+                            <p class="mt-1">{{ patient.family_medical_history }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Physical Stats -->
+                        {% if patient.height or patient.weight %}
+                        <div class="mb-2">
+                            <strong>Physical Stats:</strong>
+                            <p class="mt-1">
+                                {% if patient.height %}Height: {{ patient.height }} cm{% endif %}
+                                {% if patient.weight %}{% if patient.height %} | {% endif %}Weight: {{ patient.weight }} kg{% endif %}
+                                {% if patient.bmi %} | BMI: {{ patient.bmi }} ({{ patient.get_bmi_category }}){% endif %}
+                            </p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Patient Documents -->
+        {% if patient_documents %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5><i class="fas fa-file-medical"></i> Patient Documents & Reports</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for document in patient_documents %}
+                    <div class="col-md-6 mb-3">
+                        <div class="border p-3 rounded">
+                            <h6 class="mb-2">
+                                <i class="fas fa-file-alt"></i> {{ document.title }}
+                            </h6>
+                            <p class="small mb-1">
+                                <strong>Type:</strong> {{ document.get_document_type_display }}
+                            </p>
+                            <p class="small mb-1">
+                                <strong>Uploaded:</strong> {{ document.upload_date|date:"M d, Y" }}
+                            </p>
+                            <p class="small mb-2">
+                                <strong>Size:</strong> {{ document.file_size|filesizeformat }} ({{ document.get_file_extension }})
+                            </p>
+                            {% if document.description %}
+                            <p class="small text-muted mb-2">{{ document.description|truncatewords:15 }}</p>
+                            {% endif %}
+                            {% if document.file %}
+                                <a href="{{ document.file.url }}" class="btn btn-sm btn-outline-primary" target="_blank">
+                                    <i class="fas fa-eye"></i> View Document
+                                </a>
+                            {% else %}
+                                <span class="badge bg-secondary">File not available</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Appointment History -->
+        {% if patient_appointments.count > 1 %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5><i class="fas fa-history"></i> Appointment History with This Doctor</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Chief Complaint</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for apt in patient_appointments %}
+                            <tr{% if apt.id == appointment.id %} class="table-primary"{% endif %}>
+                                <td>{{ apt.appointment_date|date:"M d, Y" }}</td>
+                                <td>{{ apt.appointment_time|time:"g:i A" }}</td>
+                                <td>{{ apt.get_appointment_type_display|default:"Consultation" }}</td>
+                                <td>
+                                    <span class="badge bg-{% if apt.status == 'completed' %}success{% elif apt.status == 'confirmed' %}primary{% elif apt.status == 'scheduled' %}info{% elif apt.status == 'cancelled' %}danger{% else %}secondary{% endif %}">
+                                        {{ apt.status|title }}
+                                    </span>
+                                </td>
+                                <td>{{ apt.chief_complaint|truncatewords:8|default:"-" }}</td>
+                                <td>{{ apt.doctor_notes|truncatewords:8|default:"-" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Clinical Notes -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5><i class="fas fa-notes-medical"></i> Current Appointment Notes</h5>
+            </div>
+            <div class="card-body">
+                {% if appointment.chief_complaint %}
+                <div class="mb-3">
+                    <strong>Chief Complaint:</strong>
+                    <p class="mt-2">{{ appointment.chief_complaint }}</p>
+                </div>
+                {% endif %}
+                
+                {% if appointment.symptoms %}
+                <div class="mb-3">
+                    <strong>Symptoms:</strong>
+                    <p class="mt-2">{{ appointment.symptoms }}</p>
+                </div>
+                {% endif %}
+                
+                {% if appointment.doctor_notes %}
+                <div class="mb-3">
+                    <strong>Doctor's Notes:</strong>
+                    <p class="mt-2">{{ appointment.doctor_notes }}</p>
+                </div>
+                {% endif %}
+                
+                {% if appointment.notes %}
+                <div class="mb-3">
+                    <strong>Additional Notes:</strong>
+                    <p class="mt-2">{{ appointment.notes }}</p>
+                </div>
+                {% endif %}
+                
+                <!-- Follow-up Information -->
+                {% if appointment.follow_up_required %}
+                <div class="mb-3">
+                    <strong>Follow-up Required:</strong> Yes
+                    {% if appointment.follow_up_date %}
+                    <p class="mt-1"><strong>Follow-up Date:</strong> {{ appointment.follow_up_date|date:"F d, Y" }}</p>
+                    {% endif %}
+                    {% if appointment.follow_up_instructions %}
+                    <p class="mt-1"><strong>Instructions:</strong> {{ appointment.follow_up_instructions }}</p>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <!-- Quick Actions -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5><i class="fas fa-tools"></i> Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                {% if appointment.status == 'pending' %}
+                <a href="{% url 'doctors:confirm_appointment' appointment.id %}" class="btn btn-success btn-block mb-2">
+                    <i class="fas fa-check"></i> Confirm Appointment
+                </a>
+                <a href="{% url 'doctors:reject_appointment' appointment.id %}" class="btn btn-danger btn-block mb-2">
+                    <i class="fas fa-times"></i> Reject Appointment
+                </a>
+                <a href="{% url 'doctors:reschedule_appointment' appointment.id %}" class="btn btn-warning btn-block mb-2">
+                    <i class="fas fa-calendar-alt"></i> Reschedule
+                </a>
+                {% elif appointment.status == 'confirmed' %}
+                <button class="btn btn-primary btn-block mb-2" onclick="showCompleteModal()" data-bs-toggle="modal" data-bs-target="#completeModal">
+                    <i class="fas fa-check-circle"></i> Mark as Complete
+                </button>
+                <button class="btn btn-warning btn-block mb-2" onclick="showRescheduleModal()" data-bs-toggle="modal" data-bs-target="#rescheduleModal">
+                    <i class="fas fa-calendar-alt"></i> Reschedule
+                </button>
+                {% elif appointment.status == 'completed' %}
+                <button class="btn btn-info btn-block mb-2" onclick="printAppointment()">
+                    <i class="fas fa-print"></i> Print Report
+                </button>
+                {% endif %}
+                
+                <!-- Patient Information Actions -->
+                <a href="{% url 'doctors:patient_profile' patient.id %}" class="btn btn-info btn-block mb-2">
+                    <i class="fas fa-user-md"></i> Full Patient Profile
+                </a>
+                
+                {% if patient_documents %}
+                <button class="btn btn-outline-secondary btn-block mb-2" onclick="showDocuments()">
+                    <i class="fas fa-file-medical"></i> View Documents ({{ patient_documents|length }})
+                </button>
+                {% endif %}
+                
+                <a href="{% url 'doctors:patients' %}" class="btn btn-outline-primary btn-block">
+                    <i class="fas fa-users"></i> All My Patients
+                </a>
+            </div>
+        </div>
+
+        <!-- Emergency Contact -->
+        {% if user_profile and user_profile.emergency_contact_name %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5><i class="fas fa-phone-alt text-danger"></i> Emergency Contact</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>{{ user_profile.emergency_contact_name }}</strong></p>
+                <p><i class="fas fa-phone"></i> {{ user_profile.emergency_contact_phone|default:"Phone not provided" }}</p>
+                {% if user_profile.emergency_contact_relationship %}
+                <p><small class="text-muted">Relationship: {{ user_profile.emergency_contact_relationship }}</small></p>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Patient Quick Stats -->
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-line"></i> Patient Quick Stats</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-2">
+                    <small class="text-muted">Total Appointments:</small>
+                    <strong>{{ appointment_count }}</strong>
+                </div>
+                {% if patient_age %}
+                <div class="mb-2">
+                    <small class="text-muted">Age:</small>
+                    <strong>{{ patient_age }} years</strong>
+                </div>
+                {% endif %}
+                {% if patient.blood_group != 'Unknown' %}
+                <div class="mb-2">
+                    <small class="text-muted">Blood Group:</small>
+                    <strong class="text-danger">{{ patient.blood_group }}</strong>
+                </div>
+                {% endif %}
+                {% if patient.known_allergies %}
+                <div class="mb-2">
+                    <small class="text-muted text-danger">⚠️ Has Allergies</small>
+                </div>
+                {% endif %}
+                {% if patient.chronic_conditions %}
+                <div class="mb-2">
+                    <small class="text-muted text-warning">⚠️ Chronic Conditions</small>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function printAppointment() {
+    window.print();
+}
+
+function showDocuments() {
+    // Scroll to documents section
+    const documentsSection = document.querySelector('.card:has(.fa-file-medical)');
+    if (documentsSection) {
+        documentsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        documentsSection.style.border = '2px solid #007bff';
+        setTimeout(() => {
+            documentsSection.style.border = '';
+        }, 2000);
+    } else {
+        alert('Patient documents section is displayed above if any documents are available.');
+    }
+}
+
+// Add smooth scrolling and highlighting
+document.addEventListener('DOMContentLoaded', function() {
+    // Highlight current appointment in history table
+    const currentRow = document.querySelector('.table-primary');
+    if (currentRow) {
+        currentRow.style.fontWeight = 'bold';
+    }
+    
+    // Add hover effects to important alerts
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+        alert.style.cursor = 'pointer';
+        alert.addEventListener('click', function() {
+            this.style.transform = 'scale(1.02)';
+            setTimeout(() => {
+                this.style.transform = '';
+            }, 200);
+        });
+    });
+});
+
+// Complete Appointment Modal and Functions
+function showCompleteModal() {
+    $('#completeModal').modal('show');
+}
+
+function completeAppointment() {
+    const formData = new FormData(document.getElementById('completeForm'));
+    
+    fetch("{% url 'doctors:complete_appointment' appointment.id %}", {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Appointment completed successfully!');
+            location.reload();
+        } else {
+            alert('Error: ' + (data.error || 'Unknown error occurred'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error completing appointment');
+    });
+}
+
+// Reschedule Appointment Modal and Functions  
+function showRescheduleModal() {
+    $('#rescheduleModal').modal('show');
+}
+
+function rescheduleAppointment() {
+    const formData = new FormData(document.getElementById('rescheduleForm'));
+    
+    fetch("{% url 'doctors:reschedule_appointment' appointment.id %}", {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Appointment rescheduled successfully!');
+            location.reload();
+        } else {
+            alert('Error: ' + (data.error || 'Unknown error occurred'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error rescheduling appointment');
+    });
+}
+
+// Helper function to get CSRF cookie
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+
+<!-- Complete Appointment Modal -->
+<div class="modal fade" id="completeModal" tabindex="-1" aria-labelledby="completeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="completeModalLabel">
+                    <i class="fas fa-check-circle text-success"></i> Complete Appointment
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="completeForm">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">Doctor's Notes</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="4" 
+                                  placeholder="Enter diagnosis, treatment notes, or observations...">{{ appointment.doctor_notes }}</textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="follow_up_required" name="follow_up_required" 
+                                   {% if appointment.follow_up_required %}checked{% endif %}>
+                            <label class="form-check-label" for="follow_up_required">
+                                Follow-up Required
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3" id="followUpSection" {% if not appointment.follow_up_required %}style="display:none"{% endif %}>
+                        <label for="follow_up_date" class="form-label">Follow-up Date</label>
+                        <input type="date" class="form-control" id="follow_up_date" name="follow_up_date" 
+                               value="{% if appointment.follow_up_date %}{{ appointment.follow_up_date|date:'Y-m-d' }}{% endif %}">
+                    </div>
+                    
+                    <div class="mb-3" id="followUpInstructionsSection" {% if not appointment.follow_up_required %}style="display:none"{% endif %}>
+                        <label for="follow_up_instructions" class="form-label">Follow-up Instructions</label>
+                        <textarea class="form-control" id="follow_up_instructions" name="follow_up_instructions" rows="3" 
+                                  placeholder="Instructions for follow-up visit...">{{ appointment.follow_up_instructions }}</textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="completeAppointment()">
+                        <i class="fas fa-check-circle"></i> Complete Appointment
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Reschedule Appointment Modal -->
+<div class="modal fade" id="rescheduleModal" tabindex="-1" aria-labelledby="rescheduleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="rescheduleModalLabel">
+                    <i class="fas fa-calendar-alt text-warning"></i> Reschedule Appointment
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="rescheduleForm">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="new_date" class="form-label">New Date</label>
+                        <input type="date" class="form-control" id="new_date" name="new_date" required 
+                               min="{{ today|date:'Y-m-d' }}">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="new_time" class="form-label">New Time</label>
+                        <input type="time" class="form-control" id="new_time" name="new_time" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="reason" class="form-label">Reason for Rescheduling</label>
+                        <textarea class="form-control" id="reason" name="reason" rows="3" 
+                                  placeholder="Why is this appointment being rescheduled?"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-warning" onclick="rescheduleAppointment()">
+                        <i class="fas fa-calendar-alt"></i> Reschedule Appointment
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Handle follow-up checkbox
+document.getElementById('follow_up_required').addEventListener('change', function() {
+    const followUpSection = document.getElementById('followUpSection');
+    const followUpInstructionsSection = document.getElementById('followUpInstructionsSection');
+    
+    if (this.checked) {
+        followUpSection.style.display = 'block';
+        followUpInstructionsSection.style.display = 'block';
+    } else {
+        followUpSection.style.display = 'none';
+        followUpInstructionsSection.style.display = 'none';
+    }
+});
+</script>
+{% endblock %}

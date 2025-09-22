@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}VB Healthcare Management System{% endblock %}</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --vb-primary: #2c5aa0;
+            --vb-secondary: #4a90e2;
+            --vb-success: #28a745;
+            --vb-danger: #dc3545;
+            --vb-warning: #ffc107;
+            --vb-info: #17a2b8;
+            --vb-light: #f8f9fa;
+            --vb-dark: #343a40;
+            --vb-gradient-primary: linear-gradient(135deg, #2c5aa0 0%, #4a90e2 100%);
+            --vb-gradient-success: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+        
+        body {
+            background-color: var(--vb-light);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .navbar-brand {
+            font-weight: bold;
+            color: var(--vb-primary) !important;
+            font-size: 1.5rem;
+        }
+        
+        .navbar-brand .fa-shield-alt {
+            color: var(--vb-success);
+        }
+        
+        .navbar {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            background: white !important;
+        }
+        
+        /* Enhanced Profile Avatar Styles */
+        .profile-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.1rem;
+            border: 3px solid #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+            margin-right: 10px;
+        }
+        
+        .profile-avatar:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+        }
+        
+        .profile-dropdown {
+            border: none !important;
+            background: none !important;
+            padding: 8px 15px;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+        
+        .profile-dropdown:hover {
+            background: rgba(44, 90, 160, 0.1) !important;
+            transform: translateY(-1px);
+        }
+        
+        .profile-name {
+            font-weight: 600;
+            color: var(--vb-primary);
+            margin-right: 5px;
+        }
+        
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            border-radius: 15px;
+            padding: 10px 0;
+        }
+        
+        .dropdown-item {
+            padding: 10px 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .dropdown-item:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .card {
+            border: none;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            border-radius: 15px;
+        }
+        
+        .btn-primary {
+            background: var(--vb-gradient-primary);
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        
+        .btn-primary:hover {
+            background: var(--vb-secondary);
+            transform: translateY(-2px);
+            transition: all 0.3s ease;
+        }
+        
+        .bg-gradient-primary {
+            background: var(--vb-gradient-primary) !important;
+        }
+        
+        .bg-gradient-success {
+            background: var(--vb-gradient-success) !important;
+        }
+        
+        .trust-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.5rem;
+            background: rgba(40, 167, 69, 0.1);
+            color: var(--vb-success);
+            border-radius: 20px;
+            font-size: 0.75rem;
+            margin: 0.125rem;
+        }
+        
+        .footer-link {
+            color: #6c757d;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-link:hover {
+            color: var(--vb-primary);
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Trust Bar -->
+    <div class="bg-gradient-success text-white py-2">
+        <div class="container">
+            <div class="row align-items-center text-center text-md-start">
+                <div class="col-md-8">
+                    <small class="d-flex flex-wrap justify-content-center justify-content-md-start align-items-center">
+                        <span class="trust-badge me-2">
+                            <i class="fas fa-shield-alt me-1"></i> HIPAA Compliant
+                        </span>
+                        <span class="trust-badge me-2">
+                            <i class="fas fa-lock me-1"></i> SSL Secured
+                        </span>
+                        <span class="trust-badge me-2">
+                            <i class="fas fa-certificate me-1"></i> ISO 27001
+                        </span>
+                        <span class="trust-badge">
+                            <i class="fas fa-phone me-1"></i> 24/7 Support
+                        </span>
+                    </small>
+                </div>
+                <div class="col-md-4 text-center text-md-end">
+                    <small>
+                        <i class="fas fa-phone-alt me-1"></i> 
+                        Emergency: 1-800-HEALTH-911
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'home' %}">
+                <i class="fas fa-shield-alt"></i> 
+                <span class="fw-bold">VB Healthcare</span>
+                <small class="d-block" style="font-size: 0.6rem; line-height: 1;">Trusted Care</small>
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'home' %}">
+                            <i class="fas fa-home"></i> Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'about' %}">
+                            <i class="fas fa-info-circle"></i> About
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="servicesDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-stethoscope"></i> Services
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'service_appointments' %}"><i class="fas fa-calendar-check"></i> Appointments</a></li>
+                            <li><a class="dropdown-item" href="{% url 'service_medical_records' %}"><i class="fas fa-file-medical"></i> Medical Records</a></li>
+                            <li><a class="dropdown-item" href="{% url 'service_prescriptions' %}"><i class="fas fa-pills"></i> Prescriptions</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'service_telemedicine' %}"><i class="fas fa-phone"></i> Telemedicine</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                
+                <ul class="navbar-nav">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle profile-dropdown" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <div class="profile-avatar">
+                                    {{ user.first_name.0|default:user.username.0|upper }}{{ user.last_name.0|upper }}
+                                </div>
+                                <span class="profile-name">{{ user.first_name|default:user.username }}</span>
+                                <i class="fas fa-chevron-down ms-1"></i>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li class="px-3 py-2 border-bottom">
+                                    <div class="d-flex align-items-center">
+                                        <div class="profile-avatar me-3" style="width: 50px; height: 50px; font-size: 1.2rem;">
+                                            {{ user.first_name.0|default:user.username.0|upper }}{{ user.last_name.0|upper }}
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold">{{ user.get_full_name|default:user.username }}</div>
+                                            <small class="text-muted">{{ user.user_type|capfirst }} Account</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li><a class="dropdown-item" href="{% url 'accounts:profile' %}">
+                                    <i class="fas fa-user me-2"></i> Profile Settings
+                                </a></li>
+                                {% if user.user_type == 'patient' %}
+                                    <li><a class="dropdown-item" href="{% url 'patients:dashboard' %}">
+                                        <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="{% url 'patients:appointments' %}">
+                                        <i class="fas fa-calendar-check me-2"></i> My Appointments
+                                    </a></li>
+                                {% elif user.user_type == 'doctor' %}
+                                    <li><a class="dropdown-item" href="{% url 'doctors:dashboard' %}">
+                                        <i class="fas fa-stethoscope me-2"></i> Dashboard
+                                    </a></li>
+                                {% endif %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="{% url 'accounts:logout' %}">
+                                    <i class="fas fa-sign-out-alt me-2"></i> Logout
+                                </a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'accounts:login' %}">
+                                <i class="fas fa-sign-in-alt"></i> Login
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-primary ms-2" href="{% url 'accounts:register' %}">
+                                <i class="fas fa-user-plus"></i> Get Started
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container-fluid py-4">
+        {% if messages %}
+            <div class="container">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
+                        <i class="fas fa-info-circle me-2"></i>
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- Comprehensive Footer -->
+    <footer class="bg-dark text-light py-5 mt-5">
+        <div class="container">
+            <!-- Main Footer Content -->
+            <div class="row">
+                <!-- Company Information -->
+                <div class="col-lg-4 mb-4">
+                    <div class="mb-3">
+                        <h5 class="fw-bold">
+                            <i class="fas fa-shield-alt text-success"></i> 
+                            VB Healthcare
+                        </h5>
+                        <p class="text-muted">
+                            Leading healthcare technology platform providing secure, 
+                            comprehensive medical management solutions for patients 
+                            and healthcare providers worldwide.
+                        </p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6 class="fw-bold text-light">Trust & Security</h6>
+                        <div class="d-flex flex-wrap">
+                            <span class="badge bg-success me-1 mb-1">HIPAA Compliant</span>
+                            <span class="badge bg-primary me-1 mb-1">SSL Secured</span>
+                            <span class="badge bg-warning me-1 mb-1">ISO 27001</span>
+                            <span class="badge bg-info me-1 mb-1">SOC 2</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h6 class="fw-bold text-light mb-3">Quick Links</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="{% url 'home' %}" class="footer-link">
+                                <i class="fas fa-home me-1"></i> Home
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="{% url 'about' %}" class="footer-link">
+                                <i class="fas fa-info-circle me-1"></i> About Us
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="/privacy-policy/" class="footer-link">
+                                <i class="fas fa-shield-alt me-1"></i> Privacy Policy
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="/terms-of-service/" class="footer-link">
+                                <i class="fas fa-file-contract me-1"></i> Terms of Service
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Services -->
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h6 class="fw-bold text-light mb-3">Services</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="#" class="footer-link">
+                                <i class="fas fa-calendar-check me-1"></i> Appointments
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#" class="footer-link">
+                                <i class="fas fa-file-medical me-1"></i> Medical Records
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#" class="footer-link">
+                                <i class="fas fa-pills me-1"></i> Prescriptions
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#" class="footer-link">
+                                <i class="fas fa-video me-1"></i> Telemedicine
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="col-lg-4 mb-4">
+                    <h6 class="fw-bold text-light mb-3">Contact Information</h6>
+                    
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fas fa-phone text-success me-2"></i>
+                            <div>
+                                <strong class="text-danger">Emergency:</strong> 
+                                <a href="tel:1800HEALTH911" class="footer-link">1-800-HEALTH-911</a>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fas fa-headset text-info me-2"></i>
+                            <div>
+                                <strong>Support:</strong> 
+                                <a href="tel:5551234567" class="footer-link">(555) 123-4567</a>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fas fa-envelope text-warning me-2"></i>
+                            <div>
+                                <strong>Email:</strong> 
+                                <a href="mailto:support@vbhealthcare.com" class="footer-link">support@vbhealthcare.com</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-map-marker-alt text-primary me-2 mt-1"></i>
+                            <div>
+                                <strong>Address:</strong><br>
+                                <address class="text-muted mb-0">
+                                    123 Healthcare Innovation Blvd<br>
+                                    Medical District, MD 12345<br>
+                                    United States
+                                </address>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h6 class="fw-bold text-light mb-2">Business Hours</h6>
+                        <div class="text-muted small">
+                            <div class="d-flex justify-content-between">
+                                <span>Support:</span>
+                                <span>24/7 Available</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>Office:</span>
+                                <span>Mon-Fri: 8AM-8PM EST</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="my-4 bg-secondary">
+
+            <!-- Footer Bottom -->
+            <div class="row align-items-center">
+                <div class="col-lg-8 mb-3 mb-lg-0">
+                    <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center">
+                        <div class="me-md-4 mb-2 mb-md-0">
+                            <p class="mb-0 small text-muted">
+                                <strong>© 2025 VB Healthcare Management System.</strong> All rights reserved.
+                            </p>
+                        </div>
+                        <div class="me-md-4 mb-2 mb-md-0">
+                            <p class="mb-0 small text-muted">
+                                Founded & Developed by <strong class="text-light">Venkat Buthuru</strong>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <small class="text-muted">
+                            Platform designed for healthcare excellence • 
+                            HIPAA Compliant • 
+                            <span class="text-success">
+                                <i class="fas fa-check-circle"></i> Trusted by 2,500+ patients
+                            </span>
+                        </small>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 text-lg-end">
+                    <div class="mb-2">
+                        <span class="badge bg-success me-1">
+                            <i class="fas fa-shield-alt"></i> Secure
+                        </span>
+                        <span class="badge bg-primary me-1">
+                            <i class="fas fa-award"></i> Certified
+                        </span>
+                        <span class="badge bg-warning">
+                            <i class="fas fa-heart"></i> Trusted
+                        </span>
+                    </div>
+                    <div class="text-muted small">
+                        Made with <i class="fas fa-heart text-danger"></i> for better healthcare
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Font Awesome is already included via CDN link in head -->
+    
+    <!-- Custom JavaScript -->
+    <script>
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        
+        // Auto-dismiss alerts after 5 seconds
+        setTimeout(function() {
+            var alerts = document.querySelectorAll('.alert:not(.alert-permanent)');
+            alerts.forEach(function(alert) {
+                var bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+        
+        // Add smooth scrolling to anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

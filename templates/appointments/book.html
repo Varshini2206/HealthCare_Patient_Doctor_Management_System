@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+
+{% block title %}Book Appointment - HealthCare Management System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1><i class="fas fa-calendar-plus"></i> Book New Appointment</h1>
+        <p class="text-muted">Schedule an appointment with our healthcare professionals</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5>Appointment Details</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{% url 'appointments:book' %}">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Specialization</label>
+                            <select class="form-select" id="specialization">
+                                <option value="">Choose specialization...</option>
+                                <option value="cardiology">Cardiology</option>
+                                <option value="dermatology">Dermatology</option>
+                                <option value="general">General Medicine</option>
+                                <option value="orthopedics">Orthopedics</option>
+                                <option value="pediatrics">Pediatrics</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Doctor *</label>
+                            <select class="form-select" name="doctor" required>
+                                <option value="">Select a doctor...</option>
+                                {% for doctor in doctors %}
+                                    <option value="{{ doctor.id }}">
+                                        Dr. {{ doctor.user.first_name }} {{ doctor.user.last_name }}
+                                        {% if doctor.specialization %} - {{ doctor.specialization }}{% endif %}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Preferred Date *</label>
+                            <input type="date" name="appointment_date" class="form-control" min="{{ today }}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Preferred Time *</label>
+                            <select name="appointment_time" class="form-select" required>
+                                <option value="">Select time...</option>
+                                <option value="09:00:00">09:00 AM</option>
+                                <option value="10:00:00">10:00 AM</option>
+                                <option value="11:00:00">11:00 AM</option>
+                                <option value="12:00:00">12:00 PM</option>
+                                <option value="14:00:00">02:00 PM</option>
+                                <option value="15:00:00">03:00 PM</option>
+                                <option value="16:00:00">04:00 PM</option>
+                                <option value="17:00:00">05:00 PM</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Reason for Visit *</label>
+                        <textarea name="reason" class="form-control" rows="3" 
+                                  placeholder="Please describe your symptoms or reason for the appointment..." required></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Appointment Type *</label>
+                        <select name="appointment_type" class="form-select" required>
+                            <option value="consultation">General Consultation</option>
+                            <option value="follow_up">Follow-up Visit</option>
+                            <option value="check_up">Check-up</option>
+                            <option value="emergency">Emergency</option>
+                            <option value="procedure">Procedure</option>
+                            <option value="therapy">Therapy</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Consultation Method</label>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="consultation_method" id="inPerson" value="in-person" checked>
+                                    <label class="form-check-label" for="inPerson">
+                                        <i class="fas fa-hospital"></i> In-Person Visit
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="consultation_method" id="telehealth" value="telehealth">
+                                    <label class="form-check-label" for="telehealth">
+                                        <i class="fas fa-video"></i> Telehealth Consultation
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-calendar-check"></i> Book Appointment
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card bg-light">
+            <div class="card-header">
+                <h5><i class="fas fa-info-circle"></i> Appointment Guidelines</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        Book appointments at least 24 hours in advance
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        Arrive 15 minutes early for in-person visits
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        Bring valid ID and insurance information
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        Cancellations must be made 2 hours before
+                    </li>
+                </ul>
+                
+                <hr>
+                
+                <h6><i class="fas fa-phone"></i> Need Help?</h6>
+                <p class="small text-muted">
+                    Call us at <strong>(555) 123-4567</strong> for assistance with booking appointments.
+                </p>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5><i class="fas fa-clock"></i> Available Hours</h5>
+            </div>
+            <div class="card-body">
+                <div class="row small">
+                    <div class="col-6"><strong>Monday - Friday:</strong></div>
+                    <div class="col-6">9:00 AM - 6:00 PM</div>
+                </div>
+                <div class="row small">
+                    <div class="col-6"><strong>Saturday:</strong></div>
+                    <div class="col-6">9:00 AM - 2:00 PM</div>
+                </div>
+                <div class="row small">
+                    <div class="col-6"><strong>Sunday:</strong></div>
+                    <div class="col-6">Closed</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

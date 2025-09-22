@@ -1,0 +1,225 @@
+{% extends 'base.html' %}
+
+{% block title %}Prescriptions - HealthCare Management System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-pills"></i> My Prescriptions</h1>
+    <div>
+        <button class="btn btn-outline-primary me-2" data-bs-toggle="modal" data-bs-target="#filterModal">
+            <i class="fas fa-filter"></i> Filter
+        </button>
+        <button class="btn btn-primary" onclick="window.print()">
+            <i class="fas fa-print"></i> Print All
+        </button>
+    </div>
+</div>
+
+<!-- Active Prescriptions -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="fas fa-check-circle"></i> Active Prescriptions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="card border-success">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h5 class="text-success">Lisinopril 10mg</h5>
+                                        <p class="mb-1"><strong>Dosage:</strong> Take once daily in the morning</p>
+                                        <p class="mb-1"><strong>Duration:</strong> 90 days</p>
+                                        <p class="mb-1"><strong>Prescribed by:</strong> Dr. Sarah Johnson</p>
+                                        <p class="mb-1 text-muted"><strong>Date:</strong> Nov 28, 2024</p>
+                                    </div>
+                                    <span class="badge bg-success">Active</span>
+                                </div>
+                                <div class="mt-3">
+                                    <div class="progress mb-2" style="height: 8px;">
+                                        <div class="progress-bar bg-success" role="progressbar" style="width: 65%" aria-valuenow="65" aria-valuemax="100"></div>
+                                    </div>
+                                    <small class="text-muted">58 days remaining</small>
+                                </div>
+                                <div class="mt-3">
+                                    <button class="btn btn-sm btn-outline-primary me-2">
+                                        <i class="fas fa-info-circle"></i> Details
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-success">
+                                        <i class="fas fa-redo"></i> Refill Request
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-4">
+                        <div class="card border-success">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h5 class="text-success">Vitamin D3 2000 IU</h5>
+                                        <p class="mb-1"><strong>Dosage:</strong> Take once daily with food</p>
+                                        <p class="mb-1"><strong>Duration:</strong> 6 months</p>
+                                        <p class="mb-1"><strong>Prescribed by:</strong> Dr. Michael Brown</p>
+                                        <p class="mb-1 text-muted"><strong>Date:</strong> Oct 15, 2024</p>
+                                    </div>
+                                    <span class="badge bg-success">Active</span>
+                                </div>
+                                <div class="mt-3">
+                                    <div class="progress mb-2" style="height: 8px;">
+                                        <div class="progress-bar bg-success" role="progressbar" style="width: 45%" aria-valuenow="45" aria-valuemax="100"></div>
+                                    </div>
+                                    <small class="text-muted">82 days remaining</small>
+                                </div>
+                                <div class="mt-3">
+                                    <button class="btn btn-sm btn-outline-primary me-2">
+                                        <i class="fas fa-info-circle"></i> Details
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-success">
+                                        <i class="fas fa-redo"></i> Refill Request
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent/Past Prescriptions -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-history"></i> Prescription History</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Medication</th>
+                                <th>Dosage</th>
+                                <th>Prescribed By</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div>
+                                        <strong>Amoxicillin 500mg</strong><br>
+                                        <small class="text-muted">Antibiotic</small>
+                                    </div>
+                                </td>
+                                <td>Take 3 times daily</td>
+                                <td>Dr. Emily Davis</td>
+                                <td>Sep 20, 2024</td>
+                                <td><span class="badge bg-secondary">Completed</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i> View
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div>
+                                        <strong>Ibuprofen 400mg</strong><br>
+                                        <small class="text-muted">Pain relief</small>
+                                    </div>
+                                </td>
+                                <td>As needed for pain</td>
+                                <td>Dr. Sarah Johnson</td>
+                                <td>Aug 15, 2024</td>
+                                <td><span class="badge bg-secondary">Completed</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i> View
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr class="table-warning">
+                                <td>
+                                    <div>
+                                        <strong>Cough Syrup</strong><br>
+                                        <small class="text-muted">Cough suppressant</small>
+                                    </div>
+                                </td>
+                                <td>15ml twice daily</td>
+                                <td>Dr. Michael Brown</td>
+                                <td>Dec 30, 2024</td>
+                                <td><span class="badge bg-warning">Expiring Soon</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-warning me-1">
+                                        <i class="fas fa-exclamation-triangle"></i> Renew
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i> View
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filter Modal -->
+<div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="filterModalLabel">
+                    <i class="fas fa-filter"></i> Filter Prescriptions
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label for="statusFilter" class="form-label">Status</label>
+                        <select class="form-select" id="statusFilter">
+                            <option value="">All Statuses</option>
+                            <option value="active">Active</option>
+                            <option value="completed">Completed</option>
+                            <option value="expiring">Expiring Soon</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="doctorFilter" class="form-label">Prescribed By</label>
+                        <select class="form-select" id="doctorFilter">
+                            <option value="">All Doctors</option>
+                            <option value="dr-johnson">Dr. Sarah Johnson</option>
+                            <option value="dr-brown">Dr. Michael Brown</option>
+                            <option value="dr-davis">Dr. Emily Davis</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="dateRange" class="form-label">Date Range</label>
+                        <select class="form-select" id="dateRange">
+                            <option value="">All Time</option>
+                            <option value="last-month">Last Month</option>
+                            <option value="last-3-months">Last 3 Months</option>
+                            <option value="last-year">Last Year</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary">Apply Filters</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

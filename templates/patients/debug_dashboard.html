@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}Debug Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Debug Patient Dashboard</h1>
+    <p>User: {{ user.username }}</p>
+    <p>User Type: {{ user.user_type }}</p>
+    
+    <div class="alert alert-info">
+        This is a minimal dashboard template to test for namespace errors.
+        If you see this message, the basic template rendering works.
+    </div>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <h3>Basic Links</h3>
+            <a href="{% url 'accounts:profile' %}" class="btn btn-primary">Profile</a>
+            <a href="{% url 'patients:appointments' %}" class="btn btn-success">Appointments</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

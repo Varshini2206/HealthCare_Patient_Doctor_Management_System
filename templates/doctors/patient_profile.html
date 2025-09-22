@@ -1,0 +1,408 @@
+{% extends 'base.html' %}
+
+{% block title %}Patient Profile - {{ patient.user.get_full_name }} - HealthCare Management System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-user-md"></i> Patient Profile - {{ patient.user.get_full_name }}</h1>
+    <div>
+        <a href="javascript:history.back()" class="btn btn-outline-secondary me-2">
+            <i class="fas fa-arrow-left"></i> Back
+        </a>
+        <button onclick="window.print()" class="btn btn-outline-primary">
+            <i class="fas fa-print"></i> Print Profile
+        </button>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <!-- Patient Overview -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-user"></i> Patient Overview</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="text-center mb-3">
+                            {% if patient.user.avatar %}
+                                <img src="{{ patient.user.avatar.url }}" alt="Patient Photo" class="rounded-circle" style="width: 120px; height: 120px; object-fit: cover;">
+                            {% else %}
+                                <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 120px; height: 120px; margin: 0 auto;">
+                                    <i class="fas fa-user fa-3x text-white"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Full Name:</strong> {{ patient.user.get_full_name }}</p>
+                                <p><strong>Patient ID:</strong> <span class="text-primary">{{ patient.patient_id }}</span></p>
+                                <p><strong>Email:</strong> {{ patient.user.email }}</p>
+                                <p><strong>Phone:</strong> {{ patient.user.phone_number|default:"Not provided" }}</p>
+                                <p><strong>Address:</strong> {{ patient.user.address|default:"Not provided"|truncatewords:8 }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Date of Birth:</strong> 
+                                    {% if patient.user.date_of_birth %}
+                                        {{ patient.user.date_of_birth|date:"F d, Y" }}
+                                        {% if patient_age %}<br><small class="text-muted">Age: {{ patient_age }} years</small>{% endif %}
+                                    {% else %}
+                                        Not provided
+                                    {% endif %}
+                                </p>
+                                <p><strong>Gender:</strong> {{ patient.get_gender_display|default:"Not specified" }}</p>
+                                <p><strong>Blood Group:</strong> 
+                                    <span class="badge bg-danger">{{ patient.blood_group|default:"Unknown" }}</span>
+                                </p>
+                                <p><strong>Marital Status:</strong> {{ patient.get_marital_status_display|default:"Not specified" }}</p>
+                                <p><strong>Occupation:</strong> {{ patient.occupation|default:"Not specified" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Medical Information -->
+        <div class="card mb-4">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="fas fa-heartbeat"></i> Medical Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <!-- Allergies -->
+                        <div class="mb-3">
+                            <h6 class="text-danger"><i class="fas fa-exclamation-triangle"></i> <strong>Known Allergies:</strong></h6>
+                            {% if patient.known_allergies %}
+                                <div class="alert alert-danger">{{ patient.known_allergies }}</div>
+                            {% else %}
+                                <p class="text-muted">No known allergies reported</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Chronic Conditions -->
+                        <div class="mb-3">
+                            <h6 class="text-warning"><strong>Chronic Conditions:</strong></h6>
+                            {% if patient.chronic_conditions %}
+                                <div class="alert alert-warning">{{ patient.chronic_conditions }}</div>
+                            {% else %}
+                                <p class="text-muted">No chronic conditions reported</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <!-- Current Medications -->
+                        <div class="mb-3">
+                            <h6 class="text-info"><strong>Current Medications:</strong></h6>
+                            {% if patient.current_medications %}
+                                <div class="alert alert-info">{{ patient.current_medications }}</div>
+                            {% else %}
+                                <p class="text-muted">No current medications reported</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Family Medical History -->
+                        <div class="mb-3">
+                            <h6><strong>Family Medical History:</strong></h6>
+                            {% if patient.family_medical_history %}
+                                <p>{{ patient.family_medical_history }}</p>
+                            {% else %}
+                                <p class="text-muted">No family medical history reported</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Physical Stats -->
+                {% if patient.height or patient.weight %}
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h6><strong>Physical Statistics:</strong></h6>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="text-center p-2 border rounded">
+                                    <strong>{{ patient.height|default:"--" }}</strong><br>
+                                    <small class="text-muted">Height (cm)</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center p-2 border rounded">
+                                    <strong>{{ patient.weight|default:"--" }}</strong><br>
+                                    <small class="text-muted">Weight (kg)</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center p-2 border rounded">
+                                    <strong>{{ patient.bmi|default:"--" }}</strong><br>
+                                    <small class="text-muted">BMI</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center p-2 border rounded">
+                                    <strong>{{ patient.get_bmi_category|default:"--" }}</strong><br>
+                                    <small class="text-muted">Category</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Insurance Information -->
+        {% if patient.insurance_provider or patient.insurance_policy_number %}
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="fas fa-shield-alt"></i> Insurance Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Insurance Provider:</strong> {{ patient.insurance_provider|default:"Not provided" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Policy Number:</strong> {{ patient.insurance_policy_number|default:"Not provided" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Appointment History -->
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="fas fa-history"></i> Appointment History with You</h5>
+            </div>
+            <div class="card-body">
+                {% if patient_appointments %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date & Time</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Chief Complaint</th>
+                                <th>Doctor Notes</th>
+                                <th>Fee</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for appointment in patient_appointments %}
+                            <tr>
+                                <td>
+                                    <strong>{{ appointment.appointment_date|date:"M d, Y" }}</strong><br>
+                                    <small class="text-muted">{{ appointment.appointment_time|time:"g:i A" }}</small>
+                                </td>
+                                <td>{{ appointment.get_appointment_type_display|default:"Consultation" }}</td>
+                                <td>
+                                    <span class="badge bg-{% if appointment.status == 'completed' %}success{% elif appointment.status == 'confirmed' %}primary{% elif appointment.status == 'scheduled' %}info{% elif appointment.status == 'cancelled' %}danger{% else %}secondary{% endif %}">
+                                        {{ appointment.status|title }}
+                                    </span>
+                                </td>
+                                <td>{{ appointment.chief_complaint|truncatewords:10|default:"-" }}</td>
+                                <td>{{ appointment.doctor_notes|truncatewords:10|default:"-" }}</td>
+                                <td>
+                                    {% if appointment.consultation_fee %}
+                                        ${{ appointment.consultation_fee }}
+                                        {% if appointment.is_paid %}
+                                            <i class="fas fa-check-circle text-success" title="Paid"></i>
+                                        {% else %}
+                                            <i class="fas fa-clock text-warning" title="Pending"></i>
+                                        {% endif %}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted">No appointment history found.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Patient Documents -->
+        {% if patient_documents %}
+        <div class="card mb-4">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0"><i class="fas fa-file-medical"></i> Patient Documents & Reports</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for document in patient_documents %}
+                    <div class="col-md-6 mb-3">
+                        <div class="card border">
+                            <div class="card-body p-3">
+                                <h6 class="card-title">
+                                    <i class="fas fa-file-alt text-primary"></i> {{ document.title }}
+                                </h6>
+                                <div class="row text-sm">
+                                    <div class="col-6">
+                                        <small><strong>Type:</strong> {{ document.get_document_type_display }}</small>
+                                    </div>
+                                    <div class="col-6">
+                                        <small><strong>Size:</strong> {{ document.file_size|filesizeformat }}</small>
+                                    </div>
+                                    <div class="col-6">
+                                        <small><strong>Uploaded:</strong> {{ document.upload_date|date:"M d, Y" }}</small>
+                                    </div>
+                                    <div class="col-6">
+                                        <small><strong>Format:</strong> {{ document.get_file_extension }}</small>
+                                    </div>
+                                </div>
+                                {% if document.description %}
+                                <p class="card-text mt-2"><small class="text-muted">{{ document.description|truncatewords:20 }}</small></p>
+                                {% endif %}
+                                <div class="mt-2">
+                                    {% if document.file %}
+                                        <a href="{{ document.file.url }}" class="btn btn-sm btn-primary" target="_blank">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                        <a href="{{ document.file.url }}" class="btn btn-sm btn-outline-secondary" download>
+                                            <i class="fas fa-download"></i> Download
+                                        </a>
+                                    {% else %}
+                                        <span class="badge bg-secondary">File not available</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Medical Records -->
+        {% if medical_records %}
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="fas fa-notes-medical"></i> Medical Records</h5>
+            </div>
+            <div class="card-body">
+                {% for record in medical_records %}
+                <div class="border-bottom pb-3 mb-3">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h6>{{ record.title|default:"Medical Record" }}</h6>
+                            <p>{{ record.description|truncatewords:50|default:"No description" }}</p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <small class="text-muted">{{ record.created_at|date:"M d, Y" }}</small>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="col-md-4">
+        <!-- Patient Statistics -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-pie"></i> Appointment Statistics</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-4">
+                        <h4 class="text-primary">{{ total_appointments }}</h4>
+                        <small>Total</small>
+                    </div>
+                    <div class="col-4">
+                        <h4 class="text-success">{{ completed_appointments }}</h4>
+                        <small>Completed</small>
+                    </div>
+                    <div class="col-4">
+                        <h4 class="text-danger">{{ cancelled_appointments }}</h4>
+                        <small>Cancelled</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Emergency Contact -->
+        {% if user_profile and user_profile.emergency_contact_name %}
+        <div class="card mb-4">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="fas fa-phone-alt"></i> Emergency Contact</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>{{ user_profile.emergency_contact_name }}</strong></p>
+                <p><i class="fas fa-phone"></i> {{ user_profile.emergency_contact_phone|default:"Phone not provided" }}</p>
+                {% if user_profile.emergency_contact_relationship %}
+                <p><small class="text-muted">Relationship: {{ user_profile.emergency_contact_relationship }}</small></p>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Quick Actions -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5><i class="fas fa-tools"></i> Quick Actions</h5>
+            </div>
+            <div class="card-body d-grid gap-2">
+                <a href="{% url 'doctors:appointments' %}" class="btn btn-primary">
+                    <i class="fas fa-calendar"></i> Book New Appointment
+                </a>
+                <button onclick="window.print()" class="btn btn-outline-secondary">
+                    <i class="fas fa-print"></i> Print Profile
+                </button>
+                <a href="{% url 'doctors:patients' %}" class="btn btn-outline-info">
+                    <i class="fas fa-users"></i> All My Patients
+                </a>
+            </div>
+        </div>
+
+        <!-- Important Alerts -->
+        <div class="card border-warning">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0"><i class="fas fa-exclamation-triangle"></i> Important Alerts</h5>
+            </div>
+            <div class="card-body">
+                {% if patient.known_allergies %}
+                <div class="alert alert-danger alert-sm mb-2">
+                    <strong>⚠️ Has Allergies</strong><br>
+                    <small>{{ patient.known_allergies|truncatewords:10 }}</small>
+                </div>
+                {% endif %}
+                {% if patient.chronic_conditions %}
+                <div class="alert alert-warning alert-sm mb-2">
+                    <strong>⚠️ Chronic Conditions</strong><br>
+                    <small>{{ patient.chronic_conditions|truncatewords:10 }}</small>
+                </div>
+                {% endif %}
+                {% if patient.current_medications %}
+                <div class="alert alert-info alert-sm mb-2">
+                    <strong>💊 Current Medications</strong><br>
+                    <small>{{ patient.current_medications|truncatewords:10 }}</small>
+                </div>
+                {% endif %}
+                {% if not patient.known_allergies and not patient.chronic_conditions and not patient.current_medications %}
+                <p class="text-muted mb-0"><small>No critical alerts at this time.</small></p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+@media print {
+    .btn, .card-header { print-color-adjust: exact; }
+    .col-md-4 { display: none; }
+    .col-md-8 { width: 100%; }
+}
+</style>
+{% endblock %}

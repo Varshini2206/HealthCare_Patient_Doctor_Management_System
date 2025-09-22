@@ -1,0 +1,249 @@
+{% extends 'base.html' %}
+
+{% block title %}My Documents - HealthCare Management System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-folder-open"></i> My Documents</h1>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadModal">
+        <i class="fas fa-upload"></i> Upload Document
+    </button>
+</div>
+
+<!-- Document Categories -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3 mb-3">
+                        <div class="p-3 bg-light rounded">
+                            <i class="fas fa-file-medical fa-2x text-primary mb-2"></i>
+                            <h5>{{ total_records }}</h5>
+                            <p class="text-muted mb-0">Medical Records</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="p-3 bg-light rounded">
+                            <i class="fas fa-vial fa-2x text-success mb-2"></i>
+                            <h5>{{ lab_results|length }}</h5>
+                            <p class="text-muted mb-0">Lab Reports</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="p-3 bg-light rounded">
+                            <i class="fas fa-x-ray fa-2x text-info mb-2"></i>
+                            <h5>{{ imaging_docs }}</h5>
+                            <p class="text-muted mb-0">Imaging</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="p-3 bg-light rounded">
+                            <i class="fas fa-receipt fa-2x text-warning mb-2"></i>
+                            <h5>{{ insurance_docs }}</h5>
+                            <p class="text-muted mb-0">Insurance</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Documents List -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5>Recent Documents</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Document Name</th>
+                                <th>Type</th>
+                                <th>Date Added</th>
+                                <th>Size</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for document in documents %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        {% if document.type == 'Test Results' %}
+                                            <i class="fas fa-file-pdf text-danger me-2"></i>
+                                        {% elif document.type == 'Imaging' %}
+                                            <i class="fas fa-file-image text-primary me-2"></i>
+                                        {% elif document.type == 'Insurance' %}
+                                            <i class="fas fa-file-alt text-warning me-2"></i>
+                                        {% elif document.type == 'Medical' %}
+                                            <i class="fas fa-file-medical text-success me-2"></i>
+                                        {% else %}
+                                            <i class="fas fa-file text-secondary me-2"></i>
+                                        {% endif %}
+                                        <div>
+                                            <strong>{{ document.name }}</strong><br>
+                                            <small class="text-muted">{{ document.type }} Document</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if document.type == 'Test Results' %}
+                                        <span class="badge bg-success">Lab Report</span>
+                                    {% elif document.type == 'Imaging' %}
+                                        <span class="badge bg-info">Imaging</span>
+                                    {% elif document.type == 'Insurance' %}
+                                        <span class="badge bg-warning">Insurance</span>
+                                    {% elif document.type == 'Medical' %}
+                                        <span class="badge bg-primary">Medical</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Other</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ document.date_uploaded|date:"M d, Y" }}</td>
+                                <td>{{ document.size }}</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button class="btn btn-sm btn-outline-primary" title="View" onclick="viewDocument('{{ document.name }}')">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-success" title="Download" onclick="downloadDocument('{{ document.name }}')">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-info" title="Share">
+                                            <i class="fas fa-share"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-4">
+                                    <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
+                                    <p class="text-muted">No documents uploaded yet.</p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="text-center mt-3">
+                    <nav aria-label="Documents pagination">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item disabled">
+                                <span class="page-link">Previous</span>
+                            </li>
+                            <li class="page-item active">
+                                <span class="page-link">1</span>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="#">2</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="#">3</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="#">Next</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Upload Modal -->
+<div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="uploadModalLabel">
+                    <i class="fas fa-upload"></i> Upload Document
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label for="documentType" class="form-label">Document Type</label>
+                        <select class="form-select" id="documentType">
+                            <option selected>Choose document type...</option>
+                            <option value="medical">Medical Record</option>
+                            <option value="lab">Lab Report</option>
+                            <option value="imaging">Imaging</option>
+                            <option value="insurance">Insurance</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="documentTitle" class="form-label">Document Title</label>
+                        <input type="text" class="form-control" id="documentTitle" placeholder="Enter document title">
+                    </div>
+                    <div class="mb-3">
+                        <label for="documentFile" class="form-label">Choose File</label>
+                        <input class="form-control" type="file" id="documentFile" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+                        <div class="form-text">Supported formats: PDF, JPG, PNG, DOC, DOCX (Max 10MB)</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="documentDescription" class="form-label">Description (Optional)</label>
+                        <textarea class="form-control" id="documentDescription" rows="3" placeholder="Brief description of the document"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary">
+                    <i class="fas fa-upload"></i> Upload Document
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function viewDocument(documentName) {
+    // Show toast notification
+    showToast('Opening document: ' + documentName, 'info');
+    
+    // In a real application, this would open the document in a viewer
+    console.log('Viewing document:', documentName);
+}
+
+function downloadDocument(documentName) {
+    // Show toast notification
+    showToast('Downloading: ' + documentName, 'success');
+    
+    // In a real application, this would trigger the download
+    console.log('Downloading document:', documentName);
+}
+
+function showToast(message, type = 'info') {
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = `alert alert-${type === 'info' ? 'info' : type === 'success' ? 'success' : 'warning'} alert-dismissible fade show position-fixed`;
+    toast.style.top = '20px';
+    toast.style.right = '20px';
+    toast.style.zIndex = '9999';
+    toast.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    // Add to page
+    document.body.appendChild(toast);
+    
+    // Auto remove after 3 seconds
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.parentNode.removeChild(toast);
+        }
+    }, 3000);
+}
+</script>
+{% endblock %}

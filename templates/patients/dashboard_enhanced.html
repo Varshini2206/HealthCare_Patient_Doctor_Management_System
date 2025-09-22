@@ -1,0 +1,869 @@
+{% extends 'base.html' %}
+
+{% block title %}Patient Dashboard - VB Healthcare Management System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 20px;
+        padding: 2.5rem 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 15px 35px rgba(102, 126, 234, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .dashboard-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -30px;
+        width: 200px;
+        height: 200px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        animation: float 6s ease-in-out infinite;
+    }
+    
+    .dashboard-header::after {
+        content: '';
+        position: absolute;
+        bottom: -30px;
+        left: -50px;
+        width: 150px;
+        height: 150px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 50%;
+        animation: float 4s ease-in-out infinite reverse;
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(180deg); }
+    }
+    
+    .profile-card {
+        background: white;
+        border-radius: 20px;
+        padding: 1.5rem;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        border: none;
+        height: 100%;
+        transition: transform 0.3s ease;
+    }
+    
+    .profile-card:hover {
+        transform: translateY(-2px);
+    }
+    
+    .stats-card {
+        border: none;
+        border-radius: 15px;
+        transition: all 0.3s ease;
+        overflow: hidden;
+        position: relative;
+        height: 100%;
+    }
+    
+    .stats-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, rgba(255,255,255,0.3), rgba(255,255,255,0.8));
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+    
+    .quick-action-btn {
+        border: none;
+        border-radius: 15px;
+        padding: 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        position: relative;
+        overflow: hidden;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .quick-action-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    }
+    
+    .appointment-card {
+        border: none;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+        border-left: 4px solid #007bff;
+        background: white;
+    }
+    
+    .appointment-card:hover {
+        transform: translateX(5px);
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+    
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        display: inline-flex;
+        align-items: center;
+    }
+    
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 3rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        border: 4px solid rgba(255, 255, 255, 0.2);
+        position: relative;
+        transition: all 0.3s ease;
+    }
+    
+    .profile-avatar:hover {
+        transform: scale(1.05);
+        box-shadow: 0 12px 35px rgba(102, 126, 234, 0.6);
+    }
+    
+    .profile-avatar::after {
+        content: '';
+        position: absolute;
+        bottom: 8px;
+        right: 8px;
+        width: 24px;
+        height: 24px;
+        background: #28a745;
+        border-radius: 50%;
+        border: 3px solid white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    
+    .profile-avatar::before {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%);
+        top: 0;
+        left: 0;
+    }
+    
+    .health-metric {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        border-radius: 15px;
+        padding: 1.5rem;
+        color: white;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+    
+    .recent-activity-item {
+        border-left: 3px solid #e9ecef;
+        padding-left: 1rem;
+        margin-bottom: 1rem;
+        position: relative;
+    }
+    
+    .recent-activity-item::before {
+        content: '';
+        position: absolute;
+        left: -6px;
+        top: 8px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #007bff;
+    }
+    
+    .feature-highlight {
+        background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        border-radius: 15px;
+        padding: 2rem;
+        text-align: center;
+        border: none;
+    }
+    
+    /* Custom gradient backgrounds for stats cards */
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
+    }
+    
+    .bg-gradient-success {
+        background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%) !important;
+    }
+    
+    .bg-gradient-info {
+        background: linear-gradient(135deg, #17a2b8 0%, #138496 100%) !important;
+    }
+    
+    .bg-gradient-warning {
+        background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%) !important;
+    }
+    
+    .bg-gradient-danger {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Enhanced Dashboard Header with Profile -->
+<div class="dashboard-header">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <div class="d-flex align-items-center">
+                <div class="position-relative me-4">
+                    <div class="profile-avatar" data-bs-toggle="tooltip" title="Welcome, {{ user.get_full_name|default:user.username }}!">
+                        {{ user.first_name.0|default:user.username.0|upper }}{{ user.last_name.0|default:""|upper }}
+                    </div>
+                    <div class="position-absolute" style="bottom: 0; right: 0; background: white; border-radius: 50%; padding: 4px;">
+                        <i class="fas fa-user-check text-success" style="font-size: 0.8rem;"></i>
+                    </div>
+                </div>
+                <div>
+                    <h1 class="mb-1 fw-bold">Welcome back, {{ user.get_full_name|default:user.username }}!</h1>
+                    <p class="mb-0 opacity-75">
+                        <i class="fas fa-calendar me-2"></i>
+                        Today is {{ "now"|date:"F d, Y" }}
+                    </p>
+                    <p class="mb-0 opacity-75">
+                        <i class="fas fa-user-check me-2"></i>
+                        Patient ID: {{ user.patient.patient_id|default:"P000000" }}
+                    </p>
+                    <div class="mt-2">
+                        <span class="badge bg-success bg-opacity-25 text-white px-2 py-1 me-2">
+                            <i class="fas fa-shield-alt me-1"></i>Verified Patient
+                        </span>
+                        <span class="badge bg-info bg-opacity-25 text-white px-2 py-1">
+                            <i class="fas fa-star me-1"></i>Active Member
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 text-end">
+            <div class="text-white">
+                <h5 class="mb-1">
+                    <i class="fas fa-heartbeat me-2"></i>
+                    Health Status
+                </h5>
+                <span class="badge bg-success bg-opacity-25 text-white px-3 py-2">
+                    <i class="fas fa-check-circle me-1"></i>
+                    All Good
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Enhanced Quick Stats with Animations -->
+<div class="row mb-4 g-3">
+    <div class="col-xl-3 col-md-6">
+        <div class="card stats-card bg-gradient-primary text-white">
+            <div class="card-body d-flex align-items-center">
+                <div class="flex-grow-1">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h2 class="mb-1 fw-bold">{{ upcoming_appointments_count|default:0 }}</h2>
+                            <p class="mb-0 opacity-75">Upcoming Appointments</p>
+                            <small class="opacity-75">Next 30 days</small>
+                        </div>
+                        <div class="text-end">
+                            <i class="fas fa-calendar-check fa-3x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6">
+        <div class="card stats-card bg-gradient-success text-white">
+            <div class="card-body d-flex align-items-center">
+                <div class="flex-grow-1">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h2 class="mb-1 fw-bold">{{ total_appointments|default:0 }}</h2>
+                            <p class="mb-0 opacity-75">Total Visits</p>
+                            <small class="opacity-75">All time</small>
+                        </div>
+                        <div class="text-end">
+                            <i class="fas fa-history fa-3x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6">
+        <div class="card stats-card bg-gradient-info text-white">
+            <div class="card-body d-flex align-items-center">
+                <div class="flex-grow-1">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h2 class="mb-1 fw-bold">{{ pending_appointments_count|default:0 }}</h2>
+                            <p class="mb-0 opacity-75">Pending Appointments</p>
+                            <small class="opacity-75">Awaiting confirmation</small>
+                        </div>
+                        <div class="text-end">
+                            <i class="fas fa-hourglass-half fa-3x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6">
+        <div class="card stats-card bg-gradient-danger text-white">
+            <div class="card-body d-flex align-items-center">
+                <div class="flex-grow-1">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h2 class="mb-1 fw-bold">{{ cancelled_appointments_count|default:0 }}</h2>
+                            <p class="mb-0 opacity-75">Cancelled Appointments</p>
+                            <small class="opacity-75">All time</small>
+                        </div>
+                        <div class="text-end">
+                            <i class="fas fa-times-circle fa-3x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Enhanced Quick Actions -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="profile-card">
+            <div class="d-flex align-items-center mb-4">
+                <i class="fas fa-bolt text-primary fa-2x me-3"></i>
+                <div>
+                    <h4 class="mb-0 fw-bold">Quick Actions</h4>
+                    <p class="text-muted mb-0">Fast access to your most used features</p>
+                </div>
+            </div>
+            <div class="row g-3">
+                <div class="col-lg-3 col-md-6">
+                    <a href="{% url 'appointments:book' %}" class="btn quick-action-btn btn-primary w-100">
+                        <i class="fas fa-calendar-plus d-block mb-2" style="font-size: 2.5rem;"></i>
+                        <div class="fw-bold mb-1">Book Appointment</div>
+                        <small class="opacity-75">Schedule with doctor</small>
+                    </a>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <a href="{% url 'patients:medical_history' %}" class="btn quick-action-btn btn-info w-100">
+                        <i class="fas fa-file-medical-alt d-block mb-2" style="font-size: 2.5rem;"></i>
+                        <div class="fw-bold mb-1">Medical History</div>
+                        <small class="opacity-75">View past records</small>
+                    </a>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <a href="{% url 'patients:documents' %}" class="btn quick-action-btn btn-success w-100">
+                        <i class="fas fa-folder-open d-block mb-2" style="font-size: 2.5rem;"></i>
+                        <div class="fw-bold mb-1">My Documents</div>
+                        <small class="opacity-75">Reports & files</small>
+                    </a>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <a href="{% url 'accounts:profile' %}" class="btn quick-action-btn btn-warning w-100">
+                        <i class="fas fa-user-cog d-block mb-2" style="font-size: 2.5rem;"></i>
+                        <div class="fw-bold mb-1">Profile Settings</div>
+                        <small class="opacity-75">Update information</small>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Enhanced Appointments & Health Overview -->
+<div class="row mb-4">
+    <!-- Upcoming Appointments -->
+    <div class="col-lg-8">
+        <div class="profile-card">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-calendar-alt text-primary fa-2x me-3"></i>
+                    <div>
+                        <h4 class="mb-0 fw-bold">Upcoming Appointments</h4>
+                        <p class="text-muted mb-0">Your scheduled visits</p>
+                    </div>
+                </div>
+                <div class="text-end">
+                    <small class="text-muted">Next 30 days</small>
+                    <div class="mt-1">
+                        <a href="{% url 'appointments:book' %}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-plus me-1"></i>New Appointment
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            {% if upcoming_appointments %}
+                <div class="appointments-list">
+                    {% for appointment in upcoming_appointments|slice:":4" %}
+                    <div class="appointment-card p-3 mb-3 appointment-item" data-appointment-id="{{ appointment.id }}">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="profile-avatar me-3" style="width: 50px; height: 50px; font-size: 1.2rem;">
+                                        {{ appointment.doctor.user.first_name.0|upper }}{{ appointment.doctor.user.last_name.0|upper }}
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1 fw-bold text-dark">Dr. {{ appointment.doctor.user.get_full_name }}</h6>
+                                        <p class="mb-0 text-muted small">{{ appointment.doctor.specialization|default:"General Practice" }}</p>
+                                    </div>
+                                </div>
+                                <div class="appointment-details">
+                                    <div class="d-flex align-items-center text-muted small mb-1">
+                                        <i class="fas fa-calendar me-2 text-primary"></i>
+                                        <strong>{{ appointment.appointment_date|date:"F d, Y" }}</strong>
+                                        <span class="mx-2">•</span>
+                                        <i class="fas fa-clock me-1 text-success"></i>
+                                        <strong>{{ appointment.appointment_time|time:"g:i A" }}</strong>
+                                    </div>
+                                    {% if appointment.chief_complaint %}
+                                    <div class="d-flex align-items-center text-muted small">
+                                        <i class="fas fa-comment-medical me-2 text-info"></i>
+                                        {{ appointment.chief_complaint|truncatechars:60 }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <div class="mb-2">
+                                    {% if appointment.status == 'scheduled' %}
+                                        <span class="status-badge bg-warning text-dark">
+                                            <i class="fas fa-clock me-1"></i>Scheduled
+                                        </span>
+                                    {% elif appointment.status == 'confirmed' %}
+                                        <span class="status-badge bg-success text-white">
+                                            <i class="fas fa-check-circle me-1"></i>Confirmed
+                                        </span>
+                                    {% elif appointment.status == 'pending' %}
+                                        <span class="status-badge bg-info text-white">
+                                            <i class="fas fa-hourglass-half me-1"></i>Pending
+                                        </span>
+                                    {% elif appointment.status == 'cancelled' %}
+                                        <span class="status-badge bg-danger text-white">
+                                            <i class="fas fa-times-circle me-1"></i>Cancelled
+                                        </span>
+                                    {% else %}
+                                        <span class="status-badge bg-secondary text-white">
+                                            <i class="fas fa-question me-1"></i>{{ appointment.status|capfirst }}
+                                        </span>
+                                    {% endif %}
+                                </div>
+                                <div class="btn-group-sm">
+                                    <a href="{% url 'patients:appointment_detail' appointment.id %}" class="btn btn-outline-primary btn-sm me-1" data-bs-toggle="tooltip" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    {% if appointment.status == 'scheduled' %}
+                                    <button class="btn btn-outline-danger btn-sm" data-bs-toggle="tooltip" title="Cancel">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-calendar-plus fa-4x text-muted mb-3"></i>
+                    <h5 class="text-muted mb-3">No Upcoming Appointments</h5>
+                    <p class="text-muted mb-4">Schedule your next visit with one of our healthcare professionals</p>
+                    <a href="{% url 'appointments:book' %}" class="btn btn-primary">
+                        <i class="fas fa-calendar-plus me-2"></i>Book Your First Appointment
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Recent Completed Appointments -->
+    <div class="col-lg-8 mb-4">
+        <div class="profile-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-check-circle text-success fa-2x me-3"></i>
+                    <div>
+                        <h4 class="mb-0 fw-bold">Recent Completed Appointments</h4>
+                        <small class="text-muted">View details of your recent visits</small>
+                    </div>
+                </div>
+                <div>
+                    <a href="{% url 'patients:appointments' %}#completed" class="btn btn-sm btn-outline-success">
+                        <i class="fas fa-history me-1"></i>View All History
+                    </a>
+                </div>
+            </div>
+            
+            {% if completed_appointments %}
+                <div class="appointments-list">
+                    {% for appointment in completed_appointments|slice:":3" %}
+                    <div class="appointment-card p-3 mb-3 appointment-item border-start border-success border-3" data-appointment-id="{{ appointment.id }}">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="doctor-avatar me-3">
+                                        <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;">
+                                            {{ appointment.doctor.user.first_name.0 }}{{ appointment.doctor.user.last_name.0 }}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1 fw-bold">Dr. {{ appointment.doctor.user.get_full_name }}</h6>
+                                        <p class="text-muted small mb-0">{{ appointment.doctor.specialization|default:"General Practice" }}</p>
+                                    </div>
+                                </div>
+                                <div class="appointment-details">
+                                    <p class="mb-1"><i class="fas fa-calendar me-2 text-muted"></i>{{ appointment.appointment_date|date:"M d, Y" }} at {{ appointment.appointment_time|time:"g:i A" }}</p>
+                                    {% if appointment.chief_complaint %}
+                                    <p class="text-muted small mb-1"><i class="fas fa-stethoscope me-2"></i>{{ appointment.chief_complaint|truncatechars:50 }}</p>
+                                    {% endif %}
+                                    {% if appointment.doctor_notes %}
+                                    <p class="text-muted small mb-1"><i class="fas fa-notes-medical me-2"></i>{{ appointment.doctor_notes|truncatechars:60 }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <span class="status-badge bg-success text-white mb-2">
+                                    <i class="fas fa-check-circle me-1"></i>Completed
+                                </span>
+                                <div class="btn-group-sm">
+                                    <a href="{% url 'patients:appointment_detail' appointment.id %}" class="btn btn-success btn-sm" data-bs-toggle="tooltip" title="View Full Details">
+                                        <i class="fas fa-eye me-1"></i>Details
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-history fa-3x text-muted mb-3"></i>
+                    <h6 class="text-muted mb-2">No Completed Appointments Yet</h6>
+                    <p class="text-muted small">Your appointment history will appear here after your visits</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Health Overview & Quick Info -->
+    <div class="col-lg-4">
+        <!-- Health Metrics -->
+        <div class="profile-card mb-4">
+            <div class="d-flex align-items-center mb-3">
+                <i class="fas fa-heartbeat text-danger fa-2x me-3"></i>
+                <div>
+                    <h5 class="mb-0 fw-bold">Health Overview</h5>
+                    <small class="text-muted">Your vital information</small>
+                </div>
+            </div>
+            
+            <div class="health-metric mb-3">
+                <h6 class="mb-1 fw-bold">Blood Pressure</h6>
+                <h4 class="mb-0">120/80</h4>
+                <small class="opacity-75">Normal Range</small>
+            </div>
+            
+            <div class="row g-2">
+                <div class="col-6">
+                    <div class="text-center p-3 bg-light rounded">
+                        <div class="text-primary fw-bold h5 mb-1">98.6°F</div>
+                        <small class="text-muted">Temperature</small>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="text-center p-3 bg-light rounded">
+                        <div class="text-success fw-bold h5 mb-1">72 BPM</div>
+                        <small class="text-muted">Heart Rate</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="profile-card">
+            <div class="d-flex align-items-center mb-3">
+                <i class="fas fa-history text-info fa-2x me-3"></i>
+                <div>
+                    <h5 class="mb-0 fw-bold">Recent Activity</h5>
+                    <small class="text-muted">Latest updates</small>
+                </div>
+            </div>
+            
+            <div class="recent-activity-item">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h6 class="mb-1 fw-bold">Lab Results Available</h6>
+                        <p class="text-muted small mb-0">Blood work results are ready</p>
+                    </div>
+                    <small class="text-muted">2 days ago</small>
+                </div>
+            </div>
+            
+            <div class="recent-activity-item">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h6 class="mb-1 fw-bold">Prescription Renewed</h6>
+                        <p class="text-muted small mb-0">Medication refill processed</p>
+                    </div>
+                    <small class="text-muted">1 week ago</small>
+                </div>
+            </div>
+            
+            <div class="recent-activity-item">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h6 class="mb-1 fw-bold">Profile Updated</h6>
+                        <p class="text-muted small mb-0">Contact information changed</p>
+                    </div>
+                    <small class="text-muted">2 weeks ago</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Additional Features & Information -->
+<div class="row">
+    <!-- Health Tips & Reminders -->
+    <div class="col-lg-8">
+        <div class="feature-highlight">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h4 class="mb-2 fw-bold text-dark">
+                        <i class="fas fa-lightbulb text-warning me-2"></i>
+                        Health Tips & Reminders
+                    </h4>
+                    <p class="text-muted mb-3">
+                        Stay healthy with personalized recommendations and important reminders
+                    </p>
+                    <div class="row g-2">
+                        <div class="col-sm-6">
+                            <div class="d-flex align-items-center text-success">
+                                <i class="fas fa-check-circle me-2"></i>
+                                <small>Annual checkup due next month</small>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="d-flex align-items-center text-info">
+                                <i class="fas fa-pills me-2"></i>
+                                <small>Take evening medication</small>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="d-flex align-items-center text-primary">
+                                <i class="fas fa-walking me-2"></i>
+                                <small>30 min daily exercise</small>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="d-flex align-items-center text-danger">
+                                <i class="fas fa-tint me-2"></i>
+                                <small>Stay hydrated - 8 glasses</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 text-center">
+                    <i class="fas fa-heartbeat fa-5x text-primary opacity-25"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Emergency & Support -->
+    <div class="col-lg-4">
+        <div class="profile-card">
+            <div class="text-center">
+                <div class="text-danger mb-3">
+                    <i class="fas fa-phone-alt fa-3x"></i>
+                </div>
+                <h5 class="fw-bold text-danger mb-2">Emergency Contact</h5>
+                <p class="text-muted mb-3">24/7 Medical Emergency Hotline</p>
+                <a href="tel:1800HEALTH911" class="btn btn-danger btn-lg w-100 mb-3">
+                    <i class="fas fa-phone me-2"></i>
+                    1-800-HEALTH-911
+                </a>
+                <hr>
+                <h6 class="fw-bold mb-2">Need Help?</h6>
+                <div class="d-grid gap-2">
+                    <a href="tel:5551234567" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-headset me-1"></i>
+                        Support: (555) 123-4567
+                    </a>
+                    <a href="mailto:support@vbhealthcare.com" class="btn btn-outline-info btn-sm">
+                        <i class="fas fa-envelope me-1"></i>
+                        Email Support
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    // Auto-refresh appointment status every 30 seconds
+    let refreshInterval = setInterval(function() {
+        // Check for status updates
+        fetch(window.location.href, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.text())
+        .then(data => {
+            // Update appointment statuses if changed
+            const parser = new DOMParser();
+            const newDoc = parser.parseFromString(data, 'text/html');
+            
+            // Update stats cards
+            const currentStats = document.querySelectorAll('.stats-card h2');
+            const newStats = newDoc.querySelectorAll('.stats-card h2');
+            
+            currentStats.forEach((currentStat, index) => {
+                if (newStats[index] && currentStat.innerHTML !== newStats[index].innerHTML) {
+                    // Animate stats change
+                    currentStat.style.animation = 'pulse 0.5s ease-in-out';
+                    setTimeout(() => {
+                        currentStat.innerHTML = newStats[index].innerHTML;
+                    }, 250);
+                }
+            });
+            
+            // Update appointment items
+            const currentItems = document.querySelectorAll('.appointment-item');
+            const newItems = newDoc.querySelectorAll('.appointment-item');
+            
+            currentItems.forEach((currentItem, index) => {
+                if (newItems[index]) {
+                    const currentStatus = currentItem.querySelector('.status-badge');
+                    const newStatus = newItems[index].querySelector('.status-badge');
+                    
+                    if (currentStatus && newStatus && currentStatus.innerHTML !== newStatus.innerHTML) {
+                        // Animate status change
+                        currentStatus.style.animation = 'pulse 0.5s ease-in-out';
+                        setTimeout(() => {
+                            currentStatus.innerHTML = newStatus.innerHTML;
+                            currentStatus.className = newStatus.className;
+                        }, 250);
+                    }
+                }
+            });
+        })
+        .catch(error => console.log('Auto-refresh error:', error));
+    }, 30000);
+    
+    // Add smooth animations to cards
+    document.addEventListener('DOMContentLoaded', function() {
+        const cards = document.querySelectorAll('.stats-card, .appointment-card, .profile-card');
+        cards.forEach((card, index) => {
+            card.style.animationDelay = (index * 0.1) + 's';
+            card.classList.add('animate__animated', 'animate__fadeInUp');
+        });
+    });
+    
+    // Add click animation to quick action buttons
+    document.querySelectorAll('.quick-action-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            const ripple = document.createElement('span');
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            
+            ripple.style.cssText = `
+                position: absolute;
+                width: ${size}px;
+                height: ${size}px;
+                left: ${x}px;
+                top: ${y}px;
+                background: rgba(255, 255, 255, 0.3);
+                border-radius: 50%;
+                transform: scale(0);
+                animation: ripple 0.6s ease-out;
+                pointer-events: none;
+            `;
+            
+            this.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 600);
+        });
+    });
+    
+    // Add CSS for animations
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes ripple {
+            to {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .animate__fadeInUp {
+            animation-name: fadeInUp;
+            animation-duration: 0.8s;
+            animation-fill-mode: both;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translate3d(0, 40px, 0);
+            }
+            to {
+                opacity: 1;
+                transform: translate3d(0, 0, 0);
+            }
+        }
+    `;
+    document.head.appendChild(style);
+</script>
+{% endblock %}

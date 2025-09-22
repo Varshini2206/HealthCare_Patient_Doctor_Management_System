@@ -1,0 +1,361 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Schedule - {{ doctor.user.first_name }} {{ doctor.user.last_name }}{% endblock %}
+
+{% block extra_css %}
+<meta name="csrf-token" content="{{ csrf_token }}">
+<style>
+    .schedule-card {
+        border-left: 4px solid #007bff;
+        transition: all 0.3s ease;
+    }
+    .schedule-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .time-slot {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 10px;
+        margin: 5px 0;
+    }
+    .appointment-item {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 15px;
+        margin: 10px 0;
+        transition: all 0.3s ease;
+    }
+    .appointment-item:hover {
+        border-color: #007bff;
+        box-shadow: 0 2px 4px rgba(0,123,255,0.1);
+    }
+    .status-scheduled { border-left: 4px solid #28a745; }
+    .status-confirmed { border-left: 4px solid #007bff; }
+    .status-completed { border-left: 4px solid #6c757d; }
+    .status-cancelled { border-left: 4px solid #dc3545; }
+    .week-navigation {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="text-primary mb-1">
+                <i class="fas fa-calendar-alt me-2"></i>My Schedule
+            </h2>
+            <p class="text-muted mb-0">Manage your weekly appointments and schedule</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'doctors:appointments' %}" class="btn btn-outline-primary">
+                <i class="fas fa-list me-1"></i>All Appointments
+            </a>
+            <a href="{% url 'doctors:dashboard' %}" class="btn btn-primary">
+                <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Week Navigation -->
+    <div class="week-navigation">
+        <div class="row align-items-center">
+            <div class="col-md-4">
+                <h4 class="mb-0">
+                    <i class="fas fa-calendar-week text-primary me-2"></i>
+                    Week of {{ week_start|date:"M d, Y" }}
+                </h4>
+                <small class="text-muted">{{ week_start|date:"M d" }} - {{ week_end|date:"M d, Y" }}</small>
+            </div>
+            <div class="col-md-4 text-center">
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-outline-secondary">
+                        <i class="fas fa-chevron-left"></i> Previous
+                    </button>
+                    <button type="button" class="btn btn-outline-primary">Today</button>
+                    <button type="button" class="btn btn-outline-secondary">
+                        Next <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="col-md-4 text-end">
+                <div class="d-flex justify-content-end gap-2">
+                    <span class="badge bg-success">{{ weekly_appointments.count }} appointments this week</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if weekly_appointments %}
+        <!-- Weekly Schedule -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card schedule-card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-calendar-check me-2"></i>Weekly Appointments
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% regroup weekly_appointments by appointment_date as daily_appointments %}
+                        
+                        {% for day_group in daily_appointments %}
+                            <div class="mb-4">
+                                <h5 class="text-primary border-bottom pb-2 mb-3">
+                                    <i class="fas fa-calendar-day me-2"></i>
+                                    {{ day_group.grouper|date:"l, F d, Y" }}
+                                    <span class="badge bg-light text-dark ms-2">{{ day_group.list|length }} appointment{{ day_group.list|length|pluralize }}</span>
+                                </h5>
+                                
+                                <div class="row">
+                                    {% for appointment in day_group.list %}
+                                        <div class="col-md-6 col-lg-4 mb-3">
+                                            <div class="appointment-item status-{{ appointment.status }}">
+                                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                                    <div class="flex-grow-1">
+                                                        <h6 class="mb-1">
+                                                            <i class="fas fa-clock text-primary me-1"></i>
+                                                            {{ appointment.appointment_time|time:"g:i A" }}
+                                                        </h6>
+                                                        <h5 class="mb-1">
+                                                            <i class="fas fa-user text-muted me-1"></i>
+                                                            {{ appointment.patient.user.first_name }} {{ appointment.patient.user.last_name }}
+                                                        </h5>
+                                                    </div>
+                                                    <span class="badge badge-{% if appointment.status == 'scheduled' %}warning{% elif appointment.status == 'confirmed' %}primary{% elif appointment.status == 'completed' %}success{% else %}danger{% endif %}">
+                                                        {{ appointment.get_status_display }}
+                                                    </span>
+                                                </div>
+                                                
+                                                <div class="mb-2">
+                                                    <small class="text-muted d-block">
+                                                        <i class="fas fa-notes-medical me-1"></i>
+                                                        <strong>Type:</strong> {{ appointment.appointment_type|default:"General Consultation" }}
+                                                    </small>
+                                                    {% if appointment.reason %}
+                                                        <small class="text-muted d-block mt-1">
+                                                            <i class="fas fa-comment-medical me-1"></i>
+                                                            <strong>Reason:</strong> {{ appointment.reason|truncatechars:50 }}
+                                                        </small>
+                                                    {% endif %}
+                                                </div>
+                                                
+                                                <div class="d-flex gap-1 flex-wrap">
+                                                    <a href="#" class="btn btn-sm btn-outline-primary">
+                                                        <i class="fas fa-eye me-1"></i>View
+                                                    </a>
+                                                    {% if appointment.status == 'scheduled' %}
+                                                        <button class="btn btn-sm btn-success confirm-appointment-btn" 
+                                                                data-appointment-id="{{ appointment.id }}" 
+                                                                data-patient-name="{{ appointment.patient.user.get_full_name }}">
+                                                            <i class="fas fa-check me-1"></i>Confirm
+                                                        </button>
+                                                    {% endif %}
+                                                    {% if appointment.status != 'completed' and appointment.status != 'cancelled' %}
+                                                        <button class="btn btn-sm btn-outline-secondary">
+                                                            <i class="fas fa-edit me-1"></i>Edit
+                                                        </button>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <!-- No Appointments Message -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-calendar-plus fa-3x text-muted mb-3"></i>
+                        <h4 class="text-muted mb-3">No Appointments This Week</h4>
+                        <p class="text-muted mb-4">You don't have any appointments scheduled for this week.</p>
+                        <div class="d-flex justify-content-center gap-2">
+                            <a href="{% url 'doctors:appointments' %}" class="btn btn-primary">
+                                <i class="fas fa-list me-1"></i>View All Appointments
+                            </a>
+                            <a href="{% url 'doctors:dashboard' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-tachometer-alt me-1"></i>Back to Dashboard
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Quick Actions -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-bolt text-warning me-2"></i>Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'doctors:appointments' %}" class="btn btn-outline-primary w-100 p-3">
+                                <i class="fas fa-calendar-check fa-2x mb-2"></i>
+                                <div>Manage Appointments</div>
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'doctors:patients' %}" class="btn btn-outline-success w-100 p-3">
+                                <i class="fas fa-users fa-2x mb-2"></i>
+                                <div>View Patients</div>
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'accounts:profile' %}" class="btn btn-outline-info w-100 p-3">
+                                <i class="fas fa-user-cog fa-2x mb-2"></i>
+                                <div>Update Profile</div>
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'doctors:dashboard' %}" class="btn btn-outline-secondary w-100 p-3">
+                                <i class="fas fa-tachometer-alt fa-2x mb-2"></i>
+                                <div>Dashboard</div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Add some interactive functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        // Smooth scrolling for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+        
+        // Handle appointment confirmation
+        document.querySelectorAll('.confirm-appointment-btn').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const appointmentId = this.getAttribute('data-appointment-id');
+                const patientName = this.getAttribute('data-patient-name');
+                const button = this;
+                
+                // Show confirmation dialog
+                if (!confirm(`Are you sure you want to confirm the appointment with ${patientName}?`)) {
+                    return;
+                }
+                
+                // Disable button to prevent double-clicks
+                button.disabled = true;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Confirming...';
+                
+                // Get CSRF token
+                const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+                                 document.querySelector('meta[name=csrf-token]')?.getAttribute('content');
+                
+                // Send AJAX request
+                fetch(`/doctors/appointments/${appointmentId}/confirm/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken || '{{ csrf_token }}',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({
+                        'appointment_id': appointmentId
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Show success message
+                        const alertDiv = document.createElement('div');
+                        alertDiv.className = 'alert alert-success alert-dismissible fade show';
+                        alertDiv.innerHTML = `
+                            <strong>Success!</strong> ${data.message}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        `;
+                        
+                        // Insert alert at the top of the page
+                        const container = document.querySelector('.container-fluid');
+                        container.insertBefore(alertDiv, container.firstChild);
+                        
+                        // Update button appearance
+                        button.className = 'btn btn-sm btn-primary';
+                        button.innerHTML = '<i class="fas fa-check-circle me-1"></i>Confirmed';
+                        button.disabled = true;
+                        
+                        // Update appointment status badge
+                        const appointmentCard = button.closest('.appointment-item');
+                        const statusBadge = appointmentCard.querySelector('.badge');
+                        if (statusBadge) {
+                            statusBadge.className = 'badge badge-primary';
+                            statusBadge.textContent = 'confirmed';
+                        }
+                        
+                        // Auto-dismiss alert after 5 seconds
+                        setTimeout(() => {
+                            alertDiv.remove();
+                        }, 5000);
+                        
+                    } else {
+                        throw new Error(data.error || 'Failed to confirm appointment');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    
+                    // Show error message
+                    const alertDiv = document.createElement('div');
+                    alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+                    alertDiv.innerHTML = `
+                        <strong>Error!</strong> Failed to confirm appointment. Please try again.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+                    
+                    const container = document.querySelector('.container-fluid');
+                    container.insertBefore(alertDiv, container.firstChild);
+                    
+                    // Re-enable button
+                    button.disabled = false;
+                    button.innerHTML = '<i class="fas fa-check me-1"></i>Confirm';
+                    
+                    // Auto-dismiss alert after 5 seconds
+                    setTimeout(() => {
+                        alertDiv.remove();
+                    }, 5000);
+                });
+            });
+        });
+        
+        // Auto-refresh every 5 minutes
+        setTimeout(() => {
+            console.log('Auto-refreshing schedule...');
+            // window.location.reload();
+        }, 300000);
+    });
+</script>
+{% endblock %}

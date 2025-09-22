@@ -1,0 +1,534 @@
+{% extends 'base.html' %}
+
+{% block title %}My Appointments - HealthCare Management System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-calendar-alt"></i> My Appointments</h1>
+    <a href="{% url 'appointments:book' %}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Book New Appointment
+    </a>
+</div>
+
+<!-- Quick Stats -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center border-primary">
+            <div class="card-body">
+                <h3 class="text-primary">{{ upcoming_count }}</h3>
+                <p class="mb-0">Upcoming</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center border-success">
+            <div class="card-body">
+                <h3 class="text-success">{{ completed_count }}</h3>
+                <p class="mb-0">Completed</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center border-warning">
+            <div class="card-body">
+                <h3 class="text-warning">{{ pending_count }}</h3>
+                <p class="mb-0">Pending</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center border-danger">
+            <div class="card-body">
+                <h3 class="text-danger">{{ cancelled_count }}</h3>
+                <p class="mb-0">Cancelled</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Next Appointment Alert -->
+{% if next_appointment %}
+<div class="alert alert-info d-flex align-items-center mb-4" role="alert">
+    <i class="fas fa-clock me-3"></i>
+    <div>
+        <strong>Next Appointment:</strong> 
+        {{ next_appointment.appointment_date|date:"F d, Y" }} at {{ next_appointment.appointment_time|time:"g:i A" }} 
+        with Dr. {{ next_appointment.doctor.user.first_name }} {{ next_appointment.doctor.user.last_name }}
+        <div class="mt-2">
+            <a href="#" class="btn btn-sm btn-outline-info me-2" onclick="getDirections('HealthCare Center')">
+                <i class="fas fa-directions"></i> Get Directions
+            </a>
+            <a href="{% url 'appointments:reschedule' next_appointment.id %}" class="btn btn-sm btn-outline-warning me-2">
+                <i class="fas fa-edit"></i> Reschedule
+            </a>
+            <a href="{% url 'appointments:cancel' next_appointment.id %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to cancel this appointment?')">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Appointment Tabs -->
+<ul class="nav nav-tabs mb-4" id="appointmentTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="upcoming-tab" data-bs-toggle="tab" data-bs-target="#upcoming" type="button" role="tab">
+            <i class="fas fa-calendar-day"></i> Upcoming ({{ upcoming_count }})
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button" role="tab">
+            <i class="fas fa-clock"></i> Pending ({{ pending_count }})
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="completed-tab" data-bs-toggle="tab" data-bs-target="#completed" type="button" role="tab">
+            <i class="fas fa-check-circle"></i> Completed ({{ completed_count }})
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="cancelled-tab" data-bs-toggle="tab" data-bs-target="#cancelled" type="button" role="tab">
+            <i class="fas fa-times-circle"></i> Cancelled ({{ cancelled_count }})
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content" id="appointmentTabContent">
+    <!-- Upcoming Appointments -->
+    <div class="tab-pane fade show active" id="upcoming" role="tabpanel">
+        {% if upcoming_appointments %}
+            <div class="row">
+                {% for appointment in upcoming_appointments %}
+                    <div class="col-md-6 mb-4">
+                        <div class="card border-primary">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-calendar-day"></i> 
+                                    {{ appointment.appointment_date|date:"F d, Y" }}
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div>
+                                        <h6>{{ appointment.appointment_time|time:"g:i A" }}</h6>
+                                        <p class="mb-1">
+                                            <strong>Dr. {{ appointment.doctor.user.first_name }} {{ appointment.doctor.user.last_name }}</strong>
+                                        </p>
+                                        <p class="text-muted mb-0">{{ appointment.get_appointment_type_display }}</p>
+                                    </div>
+                                    <span class="badge bg-{% if appointment.status == 'scheduled' %}warning{% elif appointment.status == 'confirmed' %}success{% else %}info{% endif %}">
+                                        {{ appointment.get_status_display }}
+                                    </span>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <small class="text-muted">Purpose:</small>
+                                    <p class="mb-0">{{ appointment.chief_complaint }}</p>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <small class="text-muted">Location:</small>
+                                    <p class="mb-0">HealthCare Center, Room 205</p>
+                                </div>
+                                
+                                <div class="btn-group w-100" role="group">
+                                    <a href="#" class="btn btn-outline-primary" onclick="getDirections('HealthCare Center')">
+                                        <i class="fas fa-directions"></i> Directions
+                                    </a>
+                                    <a href="{% url 'appointments:reschedule' appointment.id %}" class="btn btn-outline-warning">
+                                        <i class="fas fa-edit"></i> Reschedule
+                                    </a>
+                                    <a href="{% url 'appointments:cancel' appointment.id %}" class="btn btn-outline-danger" onclick="return confirm('Are you sure you want to cancel this appointment?')">
+                                        <i class="fas fa-times"></i> Cancel
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-calendar-plus fa-3x text-muted mb-3"></i>
+                <h4>No Upcoming Appointments</h4>
+                <p class="text-muted">You don't have any upcoming appointments scheduled.</p>
+                <a href="{% url 'appointments:book' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Book New Appointment
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+
+
+    <!-- Pending Appointments -->
+    <div class="tab-pane fade" id="pending" role="tabpanel">
+        {% if pending_appointments %}
+            <div class="row">
+                {% for appointment in pending_appointments %}
+                    <div class="col-md-6 mb-4">
+                        <div class="card border-warning">
+                            <div class="card-header bg-warning text-dark">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-clock"></i> 
+                                    Pending - {{ appointment.appointment_date|date:"F d, Y" }}
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div>
+                                        <h6>{{ appointment.appointment_time|time:"g:i A" }}</h6>
+                                        <p class="mb-1">
+                                            <strong>Dr. {{ appointment.doctor.user.first_name }} {{ appointment.doctor.user.last_name }}</strong>
+                                        </p>
+                                        <p class="text-muted mb-0">{{ appointment.doctor.specialization }}</p>
+                                    </div>
+                                    <span class="badge bg-warning">{{ appointment.get_status_display }}</span>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <small class="text-muted">Purpose:</small>
+                                    <p class="mb-0">{{ appointment.chief_complaint }}</p>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <small class="text-muted">Type:</small>
+                                    <p class="mb-0">{{ appointment.get_appointment_type_display }}</p>
+                                </div>
+                                
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-info-circle"></i> 
+                                    Your appointment request is being reviewed. You will receive confirmation within 24 hours.
+                                </div>
+                                
+                                <div class="btn-group w-100" role="group">
+                                    <a href="{% url 'appointments:cancel' appointment.id %}" class="btn btn-outline-danger" onclick="return confirm('Are you sure you want to cancel this pending appointment?')">
+                                        <i class="fas fa-times"></i> Cancel Request
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-clock fa-3x text-muted mb-3"></i>
+                <h4>No Pending Appointments</h4>
+                <p class="text-muted">You don't have any appointments awaiting confirmation.</p>
+                <a href="{% url 'appointments:book' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Book New Appointment
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Completed Appointments -->
+    <div class="tab-pane fade" id="completed" role="tabpanel">
+        {% if completed_appointments %}
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Doctor</th>
+                                    <th>Department</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for appointment in completed_appointments %}
+                                    <tr>
+                                        <td>
+                                            <div>
+                                                <strong>{{ appointment.appointment_date|date:"M d, Y" }}</strong><br>
+                                                <small class="text-muted">{{ appointment.appointment_time|time:"g:i A" }}</small>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px;">
+                                                    {{ appointment.doctor.user.first_name.0 }}{{ appointment.doctor.user.last_name.0 }}
+                                                </div>
+                                                <div>
+                                                    <strong>Dr. {{ appointment.doctor.user.first_name }} {{ appointment.doctor.user.last_name }}</strong><br>
+                                                    <small class="text-muted">{{ appointment.doctor.specialization }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>{{ appointment.doctor.specialization }}</td>
+                                        <td><span class="badge bg-primary">{{ appointment.get_appointment_type_display }}</span></td>
+                                        <td><span class="badge bg-success">{{ appointment.get_status_display }}</span></td>
+                                        <td>
+                                            <a href="{% url 'patients:appointment_detail' appointment.id %}" class="btn btn-sm btn-primary me-1" title="View Details">
+                                                <i class="fas fa-eye"></i> Details
+                                            </a>
+                                            <a href="{% url 'appointments:book' %}" class="btn btn-sm btn-outline-primary" title="Book Again">
+                                                <i class="fas fa-redo"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Pagination for completed appointments -->
+                {% if completed_appointments.has_other_pages %}
+                    <nav aria-label="Completed appointments pagination" class="mt-3">
+                        <ul class="pagination justify-content-center">
+                            {% if completed_appointments.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ completed_appointments.previous_page_number }}#completed">Previous</a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">Previous</span>
+                                </li>
+                            {% endif %}
+                            
+                            {% for num in completed_appointments.paginator.page_range %}
+                                {% if num == completed_appointments.number %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}#completed">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if completed_appointments.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ completed_appointments.next_page_number }}#completed">Next</a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">Next</span>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-check-circle fa-3x text-muted mb-3"></i>
+                <h4>No Completed Appointments</h4>
+                <p class="text-muted">You don't have any completed appointments yet.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Cancelled Appointments -->
+    <div class="tab-pane fade" id="cancelled" role="tabpanel">
+        {% if cancelled_appointments %}
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Doctor</th>
+                                    <th>Department</th>
+                                    <th>Reason</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for appointment in cancelled_appointments %}
+                                    <tr>
+                                        <td>
+                                            <div>
+                                                <strong>{{ appointment.appointment_date|date:"M d, Y" }}</strong><br>
+                                                <small class="text-muted">{{ appointment.appointment_time|time:"g:i A" }}</small>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="rounded-circle bg-danger text-white d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px;">
+                                                    {{ appointment.doctor.user.first_name.0 }}{{ appointment.doctor.user.last_name.0 }}
+                                                </div>
+                                                <div>
+                                                    <strong>Dr. {{ appointment.doctor.user.first_name }} {{ appointment.doctor.user.last_name }}</strong><br>
+                                                    <small class="text-muted">{{ appointment.doctor.specialization }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>{{ appointment.doctor.specialization }}</td>
+                                        <td>{{ appointment.chief_complaint }}</td>
+                                        <td><span class="badge bg-danger">{{ appointment.get_status_display }}</span></td>
+                                        <td>
+                                            <a href="{% url 'appointments:book' %}" class="btn btn-sm btn-outline-primary" title="Book Again">
+                                                <i class="fas fa-redo"></i> Rebook
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="fas fa-calendar-times fa-4x text-muted mb-3"></i>
+                    <h5>No Cancelled Appointments</h5>
+                    <p class="text-muted">You don't have any cancelled appointments.</p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Book Appointment Modal -->
+<div class="modal fade" id="bookAppointmentModal" tabindex="-1" aria-labelledby="bookAppointmentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="bookAppointmentModalLabel">
+                    <i class="fas fa-calendar-plus"></i> Book New Appointment
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="department" class="form-label">Department</label>
+                            <select class="form-select" id="department" required>
+                                <option value="">Choose department...</option>
+                                <option value="cardiology">Cardiology</option>
+                                <option value="dermatology">Dermatology</option>
+                                <option value="endocrinology">Endocrinology</option>
+                                <option value="general">General Medicine</option>
+                                <option value="neurology">Neurology</option>
+                                <option value="orthopedics">Orthopedics</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="doctor" class="form-label">Doctor</label>
+                            <select class="form-select" id="doctor" required>
+                                <option value="">Choose doctor...</option>
+                                <option value="dr-johnson">Dr. Sarah Johnson</option>
+                                <option value="dr-brown">Dr. Michael Brown</option>
+                                <option value="dr-wilson">Dr. Emily Wilson</option>
+                                <option value="dr-lee">Dr. Jennifer Lee</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="appointmentDate" class="form-label">Preferred Date</label>
+                            <input type="date" class="form-control" id="appointmentDate" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="appointmentTime" class="form-label">Preferred Time</label>
+                            <select class="form-select" id="appointmentTime" required>
+                                <option value="">Choose time...</option>
+                                <option value="09:00">9:00 AM</option>
+                                <option value="09:30">9:30 AM</option>
+                                <option value="10:00">10:00 AM</option>
+                                <option value="10:30">10:30 AM</option>
+                                <option value="11:00">11:00 AM</option>
+                                <option value="11:30">11:30 AM</option>
+                                <option value="14:00">2:00 PM</option>
+                                <option value="14:30">2:30 PM</option>
+                                <option value="15:00">3:00 PM</option>
+                                <option value="15:30">3:30 PM</option>
+                                <option value="16:00">4:00 PM</option>
+                                <option value="16:30">4:30 PM</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="appointmentReason" class="form-label">Reason for Visit</label>
+                        <textarea class="form-control" id="appointmentReason" rows="3" placeholder="Please describe the reason for your appointment..."></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="appointmentType" class="form-label">Appointment Type</label>
+                        <select class="form-select" id="appointmentType" required>
+                            <option value="">Choose type...</option>
+                            <option value="routine">Routine Check-up</option>
+                            <option value="follow-up">Follow-up</option>
+                            <option value="consultation">Consultation</option>
+                            <option value="emergency">Emergency</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary">Book Appointment</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set minimum date to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('appointmentDate').setAttribute('min', today);
+    
+    // Department change handler
+    document.getElementById('department').addEventListener('change', function() {
+        const doctorSelect = document.getElementById('doctor');
+        doctorSelect.innerHTML = '<option value="">Choose doctor...</option>';
+        
+        // This would typically be populated via AJAX based on department
+        const doctors = {
+            'cardiology': ['Dr. Sarah Johnson'],
+            'dermatology': ['Dr. Emily Wilson'],
+            'endocrinology': ['Dr. Michael Brown'],
+            'general': ['Dr. Jennifer Lee']
+        };
+        
+        const selectedDept = this.value;
+        if (selectedDept && doctors[selectedDept]) {
+            doctors[selectedDept].forEach(doctor => {
+                const option = document.createElement('option');
+                option.value = doctor.toLowerCase().replace(/\s+/g, '-');
+                option.textContent = doctor;
+                doctorSelect.appendChild(option);
+            });
+        }
+    });
+});
+
+// Directions functionality
+function getDirections(destination) {
+    const address = destination || 'HealthCare Center, 123 Medical Drive, City, State 12345';
+    const encodedAddress = encodeURIComponent(address);
+    
+    // Try to detect if mobile device
+    const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    if (isMobile) {
+        // For mobile, try to open in the default maps app
+        window.open(`maps://?q=${encodedAddress}`, '_blank');
+        // Fallback to Google Maps if maps:// doesn't work
+        setTimeout(() => {
+            window.open(`https://maps.google.com/?q=${encodedAddress}`, '_blank');
+        }, 500);
+    } else {
+        // For desktop, open Google Maps in a new tab
+        window.open(`https://maps.google.com/?q=${encodedAddress}`, '_blank');
+    }
+}
+</script>
+{% endblock %}

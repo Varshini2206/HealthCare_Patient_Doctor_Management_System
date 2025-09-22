@@ -1,0 +1,425 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - VB Healthcare Management System{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card bg-gradient-primary text-white shadow-lg">
+            <div class="card-body text-center py-5">
+                <h1 class="display-3 mb-4 fw-bold">
+                    <i class="fas fa-shield-alt"></i> 
+                    VB Healthcare Management System
+                </h1>
+                <p class="lead mb-4 fs-4">
+                    Trusted by thousands • HIPAA Compliant • 24/7 Secure Access
+                </p>
+                <p class="mb-4 fs-5">
+                    Your health, our priority. Experience world-class healthcare management 
+                    with cutting-edge technology and personalized care.
+                </p>
+                <div class="mb-4">
+                    <span class="badge bg-success fs-6 me-2">
+                        <i class="fas fa-check-circle"></i> SSL Secured
+                    </span>
+                    <span class="badge bg-success fs-6 me-2">
+                        <i class="fas fa-check-circle"></i> HIPAA Compliant
+                    </span>
+                    <span class="badge bg-success fs-6">
+                        <i class="fas fa-check-circle"></i> 99.9% Uptime
+                    </span>
+                </div>
+                {% if not user.is_authenticated %}
+                    <div class="mt-4">
+                        <a href="{% url 'accounts:register' %}" class="btn btn-light btn-lg me-3">
+                            Get Started
+                        </a>
+                        <a href="{% url 'accounts:login' %}" class="btn btn-outline-light btn-lg">
+                            Login
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="mt-4">
+                        {% if user.user_type == 'patient' %}
+                            <a href="{% url 'patients:dashboard' %}" class="btn btn-light btn-lg">
+                                Go to Patient Dashboard
+                            </a>
+                        {% elif user.user_type == 'doctor' %}
+                            <a href="{% url 'doctors:dashboard' %}" class="btn btn-light btn-lg">
+                                Go to Doctor Dashboard
+                            </a>
+                        {% else %}
+                            <a href="/admin/" class="btn btn-light btn-lg">
+                                Go to Admin Panel
+                            </a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="row mb-5">
+    <div class="col-12 text-center mb-5">
+        <h2 class="display-5 fw-bold text-primary mb-3">Why Choose VB Healthcare?</h2>
+        <p class="lead text-muted">Comprehensive healthcare solutions designed with you in mind</p>
+    </div>
+    
+    <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card h-100 text-center shadow-sm border-0">
+            <div class="card-body p-4">
+                <div class="text-primary mb-3">
+                    <i class="fas fa-user-md fa-4x"></i>
+                </div>
+                <h5 class="card-title fw-bold">Expert Medical Professionals</h5>
+                <p class="card-text text-muted">
+                    Board-certified doctors with 15+ years experience. Comprehensive specializations 
+                    including cardiology, dermatology, pediatrics, and internal medicine.
+                </p>
+                <div class="mt-3">
+                    <span class="badge bg-primary">50+ Doctors</span>
+                    <span class="badge bg-success">15+ Specializations</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card h-100 text-center shadow-sm border-0">
+            <div class="card-body p-4">
+                <div class="text-success mb-3">
+                    <i class="fas fa-calendar-check fa-4x"></i>
+                </div>
+                <h5 class="card-title fw-bold">Smart Appointment System</h5>
+                <p class="card-text text-muted">
+                    Book appointments instantly with real-time availability. Automated reminders, 
+                    easy rescheduling, and integration with your calendar.
+                </p>
+                <div class="mt-3">
+                    <span class="badge bg-success">24/7 Booking</span>
+                    <span class="badge bg-info">Instant Confirmation</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card h-100 text-center shadow-sm border-0">
+            <div class="card-body p-4">
+                <div class="text-info mb-3">
+                    <i class="fas fa-shield-alt fa-4x"></i>
+                </div>
+                <h5 class="card-title fw-bold">Secure Medical Records</h5>
+                <p class="card-text text-muted">
+                    Bank-level security for your medical data. HIPAA compliant storage, 
+                    encrypted transmissions, and complete privacy protection.
+                </p>
+                <div class="mt-3">
+                    <span class="badge bg-info">256-bit Encryption</span>
+                    <span class="badge bg-warning">HIPAA Certified</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card h-100 text-center shadow-sm border-0">
+            <div class="card-body p-4">
+                <div class="text-warning mb-3">
+                    <i class="fas fa-mobile-alt fa-4x"></i>
+                </div>
+                <h5 class="card-title fw-bold">Mobile-First Experience</h5>
+                <p class="card-text text-muted">
+                    Access your healthcare anywhere, anytime. Responsive design optimized 
+                    for smartphones, tablets, and desktop computers.
+                </p>
+                <div class="mt-3">
+                    <span class="badge bg-warning">iOS & Android</span>
+                    <span class="badge bg-secondary">Responsive</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card h-100 text-center shadow-sm border-0">
+            <div class="card-body p-4">
+                <div class="text-danger mb-3">
+                    <i class="fas fa-headset fa-4x"></i>
+                </div>
+                <h5 class="card-title fw-bold">24/7 Customer Support</h5>
+                <p class="card-text text-muted">
+                    Round-the-clock assistance from our dedicated healthcare support team. 
+                    Live chat, phone support, and comprehensive help documentation.
+                </p>
+                <div class="mt-3">
+                    <span class="badge bg-danger">24/7 Available</span>
+                    <span class="badge bg-success">Live Support</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card h-100 text-center shadow-sm border-0">
+            <div class="card-body p-4">
+                <div class="text-dark mb-3">
+                    <i class="fas fa-chart-line fa-4x"></i>
+                </div>
+                <h5 class="card-title fw-bold">Health Analytics & Insights</h5>
+                <p class="card-text text-muted">
+                    Track your health journey with detailed analytics, progress reports, 
+                    and personalized health recommendations based on your data.
+                </p>
+                <div class="mt-3">
+                    <span class="badge bg-dark">AI-Powered</span>
+                    <span class="badge bg-primary">Personal Insights</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Trust & Certifications Section -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card bg-light border-0 shadow-sm">
+            <div class="card-body text-center py-5">
+                <h3 class="fw-bold mb-4">Trusted by Healthcare Professionals Worldwide</h3>
+                <div class="row">
+                    <div class="col-md-2 col-6 mb-3">
+                        <div class="p-3">
+                            <i class="fas fa-certificate text-warning fa-2x mb-2"></i>
+                            <div class="small fw-bold">HIPAA Certified</div>
+                        </div>
+                    </div>
+                    <div class="col-md-2 col-6 mb-3">
+                        <div class="p-3">
+                            <i class="fas fa-lock text-success fa-2x mb-2"></i>
+                            <div class="small fw-bold">SSL Secured</div>
+                        </div>
+                    </div>
+                    <div class="col-md-2 col-6 mb-3">
+                        <div class="p-3">
+                            <i class="fas fa-cloud text-primary fa-2x mb-2"></i>
+                            <div class="small fw-bold">Cloud Backup</div>
+                        </div>
+                    </div>
+                    <div class="col-md-2 col-6 mb-3">
+                        <div class="p-3">
+                            <i class="fas fa-shield-alt text-info fa-2x mb-2"></i>
+                            <div class="small fw-bold">Data Protection</div>
+                        </div>
+                    </div>
+                    <div class="col-md-2 col-6 mb-3">
+                        <div class="p-3">
+                            <i class="fas fa-phone text-danger fa-2x mb-2"></i>
+                            <div class="small fw-bold">24/7 Support</div>
+                        </div>
+                    </div>
+                    <div class="col-md-2 col-6 mb-3">
+                        <div class="p-3">
+                            <i class="fas fa-award text-warning fa-2x mb-2"></i>
+                            <div class="small fw-bold">Quality Assured</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Section -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card bg-gradient-success text-white shadow-lg">
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <h3 class="fw-bold">Our Impact in Numbers</h3>
+                    <p class="mb-0">Serving the community with excellence since 2020</p>
+                </div>
+                <div class="row text-center">
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="p-3">
+                            <h2 class="display-6 fw-bold">2,500+</h2>
+                            <p class="mb-0 fs-5">Happy Patients</p>
+                            <small>Served with care</small>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="p-3">
+                            <h2 class="display-6 fw-bold">50+</h2>
+                            <p class="mb-0 fs-5">Expert Doctors</p>
+                            <small>Board certified</small>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="p-3">
+                            <h2 class="display-6 fw-bold">15,000+</h2>
+                            <p class="mb-0 fs-5">Appointments</p>
+                            <small>Successfully completed</small>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="p-3">
+                            <h2 class="display-6 fw-bold">99.9%</h2>
+                            <p class="mb-0 fs-5">Uptime</p>
+                            <small>Always available</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Testimonials Section -->
+<div class="row mb-5">
+    <div class="col-12 text-center mb-5">
+        <h2 class="display-5 fw-bold text-primary">What Our Patients Say</h2>
+        <p class="lead text-muted">Real reviews from real patients</p>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="fas fa-star text-warning"></i>
+                    <i class="fas fa-star text-warning"></i>
+                    <i class="fas fa-star text-warning"></i>
+                    <i class="fas fa-star text-warning"></i>
+                    <i class="fas fa-star text-warning"></i>
+                </div>
+                <p class="card-text fst-italic">
+                    "Excellent service and very professional doctors. The online booking system 
+                    made it so easy to schedule my appointments."
+                </p>
+                <div class="mt-auto">
+                    <strong>Sarah Johnson</strong>
+                    <div class="text-muted small">Patient since 2023</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="fas fa-star text-warning"></i>
+                    <i class="fas fa-star text-warning"></i>
+                    <i class="fas fa-star text-warning"></i>
+                    <i class="fas fa-star text-warning"></i>
+                    <i class="fas fa-star text-warning"></i>
+                </div>
+                <p class="card-text fst-italic">
+                    "The medical records system is fantastic. I can access all my health 
+                    information anytime and share it easily with specialists."
+                </p>
+                <div class="mt-auto">
+                    <strong>Michael Chen</strong>
+                    <div class="text-muted small">Patient since 2022</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="fas fa-star text-warning"></i>
+                    <i class="fas fa-star text-warning"></i>
+                    <i class="fas fa-star text-warning"></i>
+                    <i class="fas fa-star text-warning"></i>
+                    <i class="fas fa-star text-warning"></i>
+                </div>
+                <p class="card-text fst-italic">
+                    "Best healthcare platform I've used. The doctors are knowledgeable, 
+                    and the support team is always helpful."
+                </p>
+                <div class="mt-auto">
+                    <strong>Dr. Emily Rodriguez</strong>
+                    <div class="text-muted small">Referring Physician</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Call to Action -->
+{% if not user.is_authenticated %}
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card border-0 bg-gradient-primary text-white shadow-lg">
+            <div class="card-body text-center py-5">
+                <h2 class="display-6 fw-bold mb-3">Ready to Experience Better Healthcare?</h2>
+                <p class="lead mb-4">
+                    Join thousands of patients and healthcare professionals who trust VB Healthcare 
+                    for their medical management needs.
+                </p>
+                <div class="mb-4">
+                    <span class="badge bg-light text-primary fs-6 me-2">
+                        <i class="fas fa-clock"></i> Free Registration
+                    </span>
+                    <span class="badge bg-light text-primary fs-6 me-2">
+                        <i class="fas fa-calendar"></i> Instant Booking
+                    </span>
+                    <span class="badge bg-light text-primary fs-6">
+                        <i class="fas fa-shield-alt"></i> 100% Secure
+                    </span>
+                </div>
+                <div>
+                    <a href="{% url 'accounts:register' %}" class="btn btn-light btn-lg me-3 shadow">
+                        <i class="fas fa-user-plus"></i> Get Started Free
+                    </a>
+                    <a href="{% url 'accounts:login' %}" class="btn btn-outline-light btn-lg shadow">
+                        <i class="fas fa-sign-in-alt"></i> Sign In
+                    </a>
+                </div>
+                <div class="mt-4">
+                    <small class="opacity-75">
+                        <i class="fas fa-lock"></i> Your data is protected by industry-standard encryption
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Contact Information -->
+<div class="row">
+    <div class="col-12">
+        <div class="card border-0 bg-dark text-white shadow-lg">
+            <div class="card-body text-center py-4">
+                <div class="row align-items-center">
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <h6 class="mb-2">
+                            <i class="fas fa-phone"></i> Emergency Hotline
+                        </h6>
+                        <p class="mb-0 fs-5 fw-bold text-danger">1-800-HEALTH-911</p>
+                    </div>
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <h6 class="mb-2">
+                            <i class="fas fa-headset"></i> Customer Support
+                        </h6>
+                        <p class="mb-0 fs-6">support@vbhealthcare.com</p>
+                        <p class="mb-0 fs-6">(555) 123-4567</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="mb-2">
+                            <i class="fas fa-map-marker-alt"></i> Main Office
+                        </h6>
+                        <p class="mb-0 fs-6">123 Healthcare Blvd</p>
+                        <p class="mb-0 fs-6">Medical City, MC 12345</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

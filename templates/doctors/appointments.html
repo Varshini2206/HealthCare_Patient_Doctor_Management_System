@@ -1,0 +1,714 @@
+{% extends 'base.html' %}
+
+{% block title %}Doctor Appointments - HealthCare Management System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-calendar-check"></i> Appointment Management</h1>
+    <div>
+        <button class="btn btn-outline-primary me-2" data-bs-toggle="modal" data-bs-target="#filterModal">
+            <i class="fas fa-filter"></i> Filter
+        </button>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAppointmentModal">
+            <i class="fas fa-plus"></i> Add Appointment
+        </button>
+    </div>
+</div>
+
+<!-- Today's Schedule Overview -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center border-primary">
+            <div class="card-body">
+                <h3 class="text-primary">{{ today_appointments.count|default:0 }}</h3>
+                <p class="mb-0">Today's Appointments</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center border-success">
+            <div class="card-body">
+                <h3 class="text-success">{{ completed_count|default:0 }}</h3>
+                <p class="mb-0">Completed</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center border-warning">
+            <div class="card-body">
+                <h3 class="text-warning">{{ pending_count|default:0 }}</h3>
+                <p class="mb-0">Pending</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center border-info">
+            <div class="card-body">
+                <h3 class="text-info">{{ week_appointments.count|default:0 }}</h3>
+                <p class="mb-0">This Week</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Calendar View Toggle -->
+<div class="row mb-3">
+    <div class="col-12">
+        <ul class="nav nav-pills" id="viewTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="today-tab" data-bs-toggle="pill" data-bs-target="#today-view" type="button" role="tab">
+                    <i class="fas fa-calendar-day"></i> Today
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="week-tab" data-bs-toggle="pill" data-bs-target="#week-view" type="button" role="tab">
+                    <i class="fas fa-calendar-week"></i> This Week
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="upcoming-tab" data-bs-toggle="pill" data-bs-target="#upcoming-view" type="button" role="tab">
+                    <i class="fas fa-clock"></i> Upcoming
+                </button>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<div class="tab-content" id="viewTabContent">
+    <!-- Today's Appointments -->
+    <div class="tab-pane fade show active" id="today-view" role="tabpanel">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-calendar-day"></i> Today's Schedule - {{ today|date:"F d, Y" }}</h5>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    <div class="timeline-item completed">
+                        <div class="timeline-time">09:00 AM</div>
+                        <div class="timeline-content">
+                            <div class="card border-success">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h6 class="mb-1">John Smith (45) - Follow-up</h6>
+                                            <p class="text-muted mb-1">Cardiology Consultation</p>
+                                            <small class="text-success"><i class="fas fa-check-circle"></i> Completed</small>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="badge bg-primary">In-Person</span><br>
+                                            <small class="text-muted">30 min</small>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2">
+                                        <button class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-file-medical"></i> View Notes
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item current">
+                        <div class="timeline-time">10:30 AM</div>
+                        <div class="timeline-content">
+                            <div class="card border-warning">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h6 class="mb-1">Mary Johnson (32) - New Patient</h6>
+                                            <p class="text-muted mb-1">General Consultation</p>
+                                            <small class="text-warning"><i class="fas fa-clock"></i> In Progress</small>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="badge bg-info">Telehealth</span><br>
+                                            <small class="text-muted">45 min</small>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2">
+                                        <button class="btn btn-sm btn-success me-2">
+                                            <i class="fas fa-video"></i> Join Call
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-user"></i> Patient Info
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item upcoming">
+                        <div class="timeline-time">02:00 PM</div>
+                        <div class="timeline-content">
+                            <div class="card border-secondary">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h6 class="mb-1">Robert Davis (58) - Annual Check-up</h6>
+                                            <p class="text-muted mb-1">Routine Physical</p>
+                                            <small class="text-secondary"><i class="fas fa-calendar-alt"></i> Confirmed</small>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="badge bg-primary">In-Person</span><br>
+                                            <small class="text-muted">60 min</small>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2">
+                                        <button class="btn btn-sm btn-outline-primary me-2">
+                                            <i class="fas fa-user"></i> Patient Info
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-info">
+                                            <i class="fas fa-edit"></i> Reschedule
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Week View -->
+    <div class="tab-pane fade" id="week-view" role="tabpanel">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-calendar-week"></i> This Week's Schedule</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th width="12%">Time</th>
+                                <th width="17.6%">Monday</th>
+                                <th width="17.6%">Tuesday</th>
+                                <th width="17.6%">Wednesday</th>
+                                <th width="17.6%">Thursday</th>
+                                <th width="17.6%">Friday</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="table-secondary"><strong>09:00</strong></td>
+                                <td class="table-success">John Smith<br><small>Follow-up</small></td>
+                                <td class="table-light"></td>
+                                <td class="table-primary">Sarah Wilson<br><small>New Patient</small></td>
+                                <td class="table-light"></td>
+                                <td class="table-warning">Emergency Slot</td>
+                            </tr>
+                            <tr>
+                                <td class="table-secondary"><strong>10:30</strong></td>
+                                <td class="table-info">Mary Johnson<br><small>Telehealth</small></td>
+                                <td class="table-primary">David Brown<br><small>Check-up</small></td>
+                                <td class="table-light"></td>
+                                <td class="table-success">Lisa Garcia<br><small>Follow-up</small></td>
+                                <td class="table-light"></td>
+                            </tr>
+                            <tr>
+                                <td class="table-secondary"><strong>02:00</strong></td>
+                                <td class="table-primary">Robert Davis<br><small>Physical</small></td>
+                                <td class="table-light"></td>
+                                <td class="table-info">Emma Taylor<br><small>Telehealth</small></td>
+                                <td class="table-light"></td>
+                                <td class="table-primary">Michael Lee<br><small>Consultation</small></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upcoming Appointments -->
+    <div class="tab-pane fade" id="upcoming-view" role="tabpanel">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-clock"></i> Upcoming Appointments</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date & Time</th>
+                                <th>Patient</th>
+                                <th>Type</th>
+                                <th>Duration</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for appointment in appointments %}
+                            <tr>
+                                <td>
+                                    <strong>{{ appointment.appointment_date|date:"M d, Y" }}</strong><br>
+                                    <small class="text-muted">{{ appointment.appointment_time|time:"g:i A" }}</small>
+                                </td>
+                                <td>
+                                    <div>
+                                        <strong>{{ appointment.patient.user.get_full_name }}</strong><br>
+                                        <small class="text-muted">
+                                            {% if appointment.patient.date_of_birth %}
+                                                Age: {{ appointment.patient.date_of_birth|timesince|slice:":2" }} | 
+                                            {% endif %}
+                                            {{ appointment.appointment_type|default:"Regular" }}
+                                        </small>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if appointment.appointment_type == 'telehealth' %}
+                                        <span class="badge bg-info">Telehealth</span>
+                                    {% else %}
+                                        <span class="badge bg-primary">In-Person</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ appointment.duration|default:"30" }} min</td>
+                                <td>
+                                    {% if appointment.status == 'pending' %}
+                                        <span class="badge bg-warning">Pending</span>
+                                    {% elif appointment.status == 'confirmed' %}
+                                        <span class="badge bg-success">Confirmed</span>
+                                    {% elif appointment.status == 'completed' %}
+                                        <span class="badge bg-primary">Completed</span>
+                                    {% elif appointment.status == 'cancelled' %}
+                                        <span class="badge bg-danger">Cancelled</span>
+                                    {% elif appointment.status == 'rescheduled' %}
+                                        <span class="badge bg-info">Rescheduled</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ appointment.status|title }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary me-1" title="Patient Info" onclick="viewPatientDetails({{ appointment.patient.id }})">
+                                        <i class="fas fa-user"></i>
+                                    </button>
+                                    {% if appointment.status == 'pending' %}
+                                    <button class="btn btn-sm btn-outline-success me-1" title="Confirm" onclick="confirmAppointment({{ appointment.id }})">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger me-1" title="Reject" onclick="rejectAppointment({{ appointment.id }})">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                    {% endif %}
+                                    {% if appointment.status in 'confirmed,rescheduled' %}
+                                    <button class="btn btn-sm btn-outline-info me-1" title="Reschedule" onclick="rescheduleAppointment({{ appointment.id }})">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-success me-1" title="Complete" onclick="completeAppointment({{ appointment.id }})">
+                                        <i class="fas fa-check-circle"></i>
+                                    </button>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-4">
+                                    <i class="fas fa-calendar-times fa-2x mb-2"></i><br>
+                                    No appointments found.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Patient Details Modal -->
+<div class="modal fade" id="patientModal" tabindex="-1" aria-labelledby="patientModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="patientModalLabel">
+                    <i class="fas fa-user"></i> Patient Details
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="patientModalBody">
+                <div class="text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reject Appointment Modal -->
+<div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="rejectModalLabel">
+                    <i class="fas fa-times-circle"></i> Reject Appointment
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="rejectForm">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    <input type="hidden" id="rejectAppointmentId" name="appointment_id">
+                    <div class="mb-3">
+                        <label for="rejectReason" class="form-label"><strong>Reason for rejection:</strong></label>
+                        <textarea class="form-control" id="rejectReason" name="reason" rows="3" placeholder="Please provide a reason for rejecting this appointment..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-times"></i> Reject Appointment
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Reschedule Appointment Modal -->
+<div class="modal fade" id="rescheduleModal" tabindex="-1" aria-labelledby="rescheduleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="rescheduleModalLabel">
+                    <i class="fas fa-calendar-alt"></i> Reschedule Appointment
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="rescheduleForm">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    <input type="hidden" id="rescheduleAppointmentId" name="appointment_id">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="newDate" class="form-label"><strong>New Date:</strong></label>
+                            <input type="date" class="form-control" id="newDate" name="new_date" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="newTime" class="form-label"><strong>New Time:</strong></label>
+                            <input type="time" class="form-control" id="newTime" name="new_time" required>
+                        </div>
+                    </div>
+                    <div class="mb-3 mt-3">
+                        <label for="rescheduleReason" class="form-label"><strong>Reason (optional):</strong></label>
+                        <textarea class="form-control" id="rescheduleReason" name="reason" rows="2" placeholder="Reason for rescheduling..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-info">
+                        <i class="fas fa-calendar-alt"></i> Reschedule
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Complete Appointment Modal -->
+<div class="modal fade" id="completeModal" tabindex="-1" aria-labelledby="completeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="completeModalLabel">
+                    <i class="fas fa-check-circle"></i> Complete Appointment
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="completeForm">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    <input type="hidden" id="completeAppointmentId" name="appointment_id">
+                    <div class="mb-3">
+                        <label for="diagnosis" class="form-label"><strong>Diagnosis:</strong></label>
+                        <textarea class="form-control" id="diagnosis" name="diagnosis" rows="2" placeholder="Enter diagnosis..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="prescription" class="form-label"><strong>Prescription:</strong></label>
+                        <textarea class="form-control" id="prescription" name="prescription" rows="3" placeholder="Enter prescription details..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="notes" class="form-label"><strong>Additional Notes:</strong></label>
+                        <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Enter any additional notes..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="followUpNeeded" name="follow_up_needed">
+                            <label class="form-check-label" for="followUpNeeded">
+                                Follow-up appointment needed
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3" id="followUpDateDiv" style="display: none;">
+                        <label for="followUpDate" class="form-label"><strong>Follow-up Date:</strong></label>
+                        <input type="date" class="form-control" id="followUpDate" name="follow_up_date">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check-circle"></i> Complete Appointment
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Function to get CSRF token
+function getCsrfToken() {
+    return document.querySelector('[name=csrfmiddlewaretoken]').value;
+}
+
+// View patient details
+function viewPatientDetails(patientId) {
+    const modal = new bootstrap.Modal(document.getElementById('patientModal'));
+    const modalBody = document.getElementById('patientModalBody');
+    
+    modalBody.innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    `;
+    
+    modal.show();
+    
+    fetch(`/doctors/patients/${patientId}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const patient = data.patient;
+                modalBody.innerHTML = `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><strong>Personal Information</strong></h6>
+                            <p><strong>Name:</strong> ${patient.name}</p>
+                            <p><strong>Email:</strong> ${patient.email}</p>
+                            <p><strong>Phone:</strong> ${patient.phone || 'N/A'}</p>
+                            <p><strong>Date of Birth:</strong> ${patient.date_of_birth || 'N/A'}</p>
+                            <p><strong>Gender:</strong> ${patient.gender || 'N/A'}</p>
+                            <p><strong>Blood Type:</strong> ${patient.blood_type || 'N/A'}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><strong>Emergency Contact</strong></h6>
+                            <p><strong>Name:</strong> ${patient.emergency_contact || 'N/A'}</p>
+                            <p><strong>Phone:</strong> ${patient.emergency_phone || 'N/A'}</p>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-12">
+                            <h6><strong>Medical Information</strong></h6>
+                            <p><strong>Medical History:</strong></p>
+                            <p class="text-muted">${patient.medical_history || 'No medical history recorded'}</p>
+                            <p><strong>Allergies:</strong></p>
+                            <p class="text-muted">${patient.allergies || 'No known allergies'}</p>
+                            <p><strong>Current Medications:</strong></p>
+                            <p class="text-muted">${patient.current_medications || 'No current medications'}</p>
+                        </div>
+                    </div>
+                    <hr>
+                    <h6><strong>Appointment History</strong></h6>
+                    <div class="table-responsive" style="max-height: 200px; overflow-y: auto;">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Diagnosis</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${patient.appointments.map(apt => `
+                                    <tr>
+                                        <td>${apt.date} ${apt.time}</td>
+                                        <td><span class="badge bg-${apt.status === 'completed' ? 'success' : apt.status === 'confirmed' ? 'primary' : 'secondary'}">${apt.status}</span></td>
+                                        <td>${apt.diagnosis || 'N/A'}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            } else {
+                modalBody.innerHTML = '<div class="alert alert-danger">Failed to load patient details.</div>';
+            }
+        })
+        .catch(error => {
+            modalBody.innerHTML = '<div class="alert alert-danger">Error loading patient details.</div>';
+        });
+}
+
+// Confirm appointment
+function confirmAppointment(appointmentId) {
+    if (confirm('Are you sure you want to confirm this appointment?')) {
+        fetch(`/doctors/appointments/${appointmentId}/confirm/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCsrfToken(),
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Appointment confirmed successfully!');
+                location.reload();
+            } else {
+                alert('Error confirming appointment: ' + data.error);
+            }
+        })
+        .catch(error => {
+            alert('Error confirming appointment');
+        });
+    }
+}
+
+// Reject appointment
+function rejectAppointment(appointmentId) {
+    document.getElementById('rejectAppointmentId').value = appointmentId;
+    const modal = new bootstrap.Modal(document.getElementById('rejectModal'));
+    modal.show();
+}
+
+// Handle reject form submission
+document.getElementById('rejectForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const appointmentId = document.getElementById('rejectAppointmentId').value;
+    const reason = document.getElementById('rejectReason').value;
+    
+    const formData = new FormData();
+    formData.append('csrfmiddlewaretoken', getCsrfToken());
+    formData.append('reason', reason);
+    
+    fetch(`/doctors/appointments/${appointmentId}/reject/`, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Appointment rejected successfully!');
+            bootstrap.Modal.getInstance(document.getElementById('rejectModal')).hide();
+            location.reload();
+        } else {
+            alert('Error rejecting appointment: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('Error rejecting appointment');
+    });
+});
+
+// Reschedule appointment
+function rescheduleAppointment(appointmentId) {
+    document.getElementById('rescheduleAppointmentId').value = appointmentId;
+    const modal = new bootstrap.Modal(document.getElementById('rescheduleModal'));
+    modal.show();
+}
+
+// Handle reschedule form submission
+document.getElementById('rescheduleForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const appointmentId = document.getElementById('rescheduleAppointmentId').value;
+    const newDate = document.getElementById('newDate').value;
+    const newTime = document.getElementById('newTime').value;
+    const reason = document.getElementById('rescheduleReason').value;
+    
+    const formData = new FormData();
+    formData.append('csrfmiddlewaretoken', getCsrfToken());
+    formData.append('new_date', newDate);
+    formData.append('new_time', newTime);
+    formData.append('reason', reason);
+    
+    fetch(`/doctors/appointments/${appointmentId}/reschedule/`, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Appointment rescheduled successfully!');
+            bootstrap.Modal.getInstance(document.getElementById('rescheduleModal')).hide();
+            location.reload();
+        } else {
+            alert('Error rescheduling appointment: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('Error rescheduling appointment');
+    });
+});
+
+// Complete appointment
+function completeAppointment(appointmentId) {
+    document.getElementById('completeAppointmentId').value = appointmentId;
+    const modal = new bootstrap.Modal(document.getElementById('completeModal'));
+    modal.show();
+}
+
+// Handle follow-up checkbox
+document.getElementById('followUpNeeded').addEventListener('change', function() {
+    const followUpDiv = document.getElementById('followUpDateDiv');
+    if (this.checked) {
+        followUpDiv.style.display = 'block';
+    } else {
+        followUpDiv.style.display = 'none';
+        document.getElementById('followUpDate').value = '';
+    }
+});
+
+// Handle complete form submission
+document.getElementById('completeForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const appointmentId = document.getElementById('completeAppointmentId').value;
+    const diagnosis = document.getElementById('diagnosis').value;
+    const prescription = document.getElementById('prescription').value;
+    const notes = document.getElementById('notes').value;
+    const followUpNeeded = document.getElementById('followUpNeeded').checked;
+    const followUpDate = document.getElementById('followUpDate').value;
+    
+    const formData = new FormData();
+    formData.append('csrfmiddlewaretoken', getCsrfToken());
+    formData.append('diagnosis', diagnosis);
+    formData.append('prescription', prescription);
+    formData.append('notes', notes);
+    if (followUpNeeded) {
+        formData.append('follow_up_needed', 'on');
+        if (followUpDate) {
+            formData.append('follow_up_date', followUpDate);
+        }
+    }
+    
+    fetch(`/doctors/appointments/${appointmentId}/complete/`, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Appointment completed successfully!');
+            bootstrap.Modal.getInstance(document.getElementById('completeModal')).hide();
+            location.reload();
+        } else {
+            alert('Error completing appointment: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('Error completing appointment');
+    });
+});
+</script>
+{% endblock %}

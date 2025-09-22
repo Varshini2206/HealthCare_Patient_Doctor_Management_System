@@ -1,0 +1,293 @@
+{% extends 'base.html' %}
+
+{% block title %}Medical History - HealthCare Management System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-file-medical"></i> Medical History</h1>
+    <div>
+        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#exportModal">
+            <i class="fas fa-download"></i> Export Records
+        </button>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <!-- Recent Records -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5><i class="fas fa-clock"></i> Recent Medical Records</h5>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-success"></div>
+                        <div class="timeline-content">
+                            <h6 class="mb-1">Annual Check-up</h6>
+                            <p class="text-muted mb-1">Dr. Sarah Johnson - December 15, 2024</p>
+                            <p class="small">Routine physical examination. All vital signs normal. Continue current medications.</p>
+                            <div class="mt-2">
+                                <span class="badge bg-light text-dark me-1">Blood Pressure: 120/80</span>
+                                <span class="badge bg-light text-dark me-1">Weight: 68kg</span>
+                                <span class="badge bg-light text-dark">Height: 170cm</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-info"></div>
+                        <div class="timeline-content">
+                            <h6 class="mb-1">Lab Results</h6>
+                            <p class="text-muted mb-1">City Medical Lab - December 10, 2024</p>
+                            <p class="small">Complete blood count and lipid panel results available.</p>
+                            <div class="mt-2">
+                                <button class="btn btn-sm btn-outline-primary">View Results</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-warning"></div>
+                        <div class="timeline-content">
+                            <h6 class="mb-1">Prescription Update</h6>
+                            <p class="text-muted mb-1">Dr. Michael Brown - November 28, 2024</p>
+                            <p class="small">Updated dosage for blood pressure medication. Follow up in 3 months.</p>
+                            <div class="mt-2">
+                                <span class="badge bg-warning text-dark">Lisinopril 10mg daily</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <!-- Health Summary -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5><i class="fas fa-heartbeat"></i> Health Summary</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6 mb-3">
+                        <h4 class="text-success mb-1">Normal</h4>
+                        <small class="text-muted">Blood Pressure</small>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <h4 class="text-info mb-1">68kg</h4>
+                        <small class="text-muted">Current Weight</small>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <h4 class="text-warning mb-1">24.2</h4>
+                        <small class="text-muted">BMI</small>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <h4 class="text-primary mb-1">98.6°F</h4>
+                        <small class="text-muted">Last Temperature</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Active Medications -->
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-pills"></i> Active Medications</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        <div>
+                            <h6 class="mb-1">Lisinopril</h6>
+                            <p class="mb-0 text-muted small">10mg - Once daily</p>
+                        </div>
+                        <span class="badge bg-success">Active</span>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        <div>
+                            <h6 class="mb-1">Vitamin D3</h6>
+                            <p class="mb-0 text-muted small">2000 IU - Once daily</p>
+                        </div>
+                        <span class="badge bg-success">Active</span>
+                    </div>
+                </div>
+                <div class="text-center mt-3">
+                    {# COMMENTED: <a href="{% url 'medical_records:prescriptions' %}" class="btn btn-outline-primary btn-sm">
+                        View All Medications
+                    </a> #}
+                    <p class="text-muted">Medical records section temporarily disabled</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Export Records Modal -->
+<div class="modal fade" id="exportModal" tabindex="-1" aria-labelledby="exportModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exportModalLabel">
+                    <i class="fas fa-download"></i> Export Medical Records
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="exportForm" action="{% url 'patients:export_medical_records' %}" method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Select Records to Export:</strong></label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="appointments" id="exportAppointments" checked>
+                            <label class="form-check-label" for="exportAppointments">
+                                Appointment History
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="medical_records" id="exportMedical" checked>
+                            <label class="form-check-label" for="exportMedical">
+                                Medical Records & Notes
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="prescriptions" id="exportPrescriptions" checked>
+                            <label class="form-check-label" for="exportPrescriptions">
+                                Prescriptions & Medications
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="lab_results" id="exportLabs" checked>
+                            <label class="form-check-label" for="exportLabs">
+                                Lab Tests & Results
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="dateRange" class="form-label"><strong>Date Range:</strong></label>
+                        <select class="form-select" name="date_range" id="dateRange">
+                            <option value="all">All Records</option>
+                            <option value="last_year">Last 12 Months</option>
+                            <option value="last_6months">Last 6 Months</option>
+                            <option value="last_3months">Last 3 Months</option>
+                            <option value="custom">Custom Range</option>
+                        </select>
+                    </div>
+                    
+                    <div id="customDateRange" class="mb-3" style="display: none;">
+                        <div class="row">
+                            <div class="col-6">
+                                <label for="startDate" class="form-label">From Date:</label>
+                                <input type="date" class="form-control" name="start_date" id="startDate">
+                            </div>
+                            <div class="col-6">
+                                <label for="endDate" class="form-label">To Date:</label>
+                                <input type="date" class="form-control" name="end_date" id="endDate">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="exportFormat" class="form-label"><strong>Export Format:</strong></label>
+                        <select class="form-select" name="format" id="exportFormat">
+                            <option value="pdf">PDF Document</option>
+                            <option value="excel">Excel Spreadsheet</option>
+                            <option value="csv">CSV File</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="exportRecords()">
+                    <i class="fas fa-download"></i> Export Records
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Handle custom date range display
+document.getElementById('dateRange').addEventListener('change', function() {
+    const customRange = document.getElementById('customDateRange');
+    if (this.value === 'custom') {
+        customRange.style.display = 'block';
+    } else {
+        customRange.style.display = 'none';
+    }
+});
+
+// Handle export functionality
+function exportRecords() {
+    const form = document.getElementById('exportForm');
+    const formData = new FormData();
+    
+    // Add CSRF token
+    formData.append('csrfmiddlewaretoken', form.querySelector('[name="csrfmiddlewaretoken"]').value);
+    
+    // Add selected record types
+    const checkboxes = form.querySelectorAll('input[type="checkbox"]:checked');
+    const recordTypes = Array.from(checkboxes).map(cb => cb.value);
+    formData.append('record_types', JSON.stringify(recordTypes));
+    
+    // Add other form data
+    formData.append('date_range', form.querySelector('[name="date_range"]').value);
+    formData.append('format', form.querySelector('[name="format"]').value);
+    
+    if (form.querySelector('[name="date_range"]').value === 'custom') {
+        formData.append('start_date', form.querySelector('[name="start_date"]').value);
+        formData.append('end_date', form.querySelector('[name="end_date"]').value);
+    }
+    
+    // Show loading state
+    const exportBtn = document.querySelector('#exportModal .btn-primary');
+    const originalText = exportBtn.innerHTML;
+    exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Exporting...';
+    exportBtn.disabled = true;
+    
+    // Submit form
+    fetch(form.action, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (response.ok) {
+            return response.blob();
+        }
+        throw new Error('Export failed');
+    })
+    .then(blob => {
+        // Create download link
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        
+        // Set filename based on format
+        const format = form.querySelector('[name="format"]').value;
+        const extension = format === 'pdf' ? 'pdf' : format === 'excel' ? 'xlsx' : 'csv';
+        a.download = `medical_records_${new Date().toISOString().split('T')[0]}.${extension}`;
+        
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+        // Close modal
+        bootstrap.Modal.getInstance(document.getElementById('exportModal')).hide();
+    })
+    .catch(error => {
+        alert('Export failed. Please try again.');
+        console.error('Export error:', error);
+    })
+    .finally(() => {
+        // Restore button state
+        exportBtn.innerHTML = originalText;
+        exportBtn.disabled = false;
+    });
+}
+</script>
+{% endblock %}

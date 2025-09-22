@@ -1,0 +1,153 @@
+# Healthcare Patient Management System - .gitignore
+
+# Environment Variables - CRITICAL: Never commit these!
+.env
+.env.local
+.env.production
+.env.staging
+*.env
+
+# Database
+*.db
+*.sqlite3
+db.sqlite3
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+healthcare_env/
+venv/
+env/
+ENV/
+.venv/
+
+# Django
+*.log
+local_settings.py
+db.sqlite3-journal
+
+# Media files (user uploads)
+media/
+!media/.gitkeep
+
+# Static files (after collectstatic)
+staticfiles/
+static_root/
+
+# IDE/Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Testing files
+test_*.py
+*_test.py
+debug_*.py
+*debug*.py
+check_*.py
+setup_*.py
+dummy_*.py
+sample_*.py
+final_*.py
+live_*.py
+quick_*.py
+system_*.py
+
+# Coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Backup files
+*.bak
+*.backup
+*.sql.bak
+
+# Database setup files with credentials
+setup_database.sql
+
+# Log files
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Security files
+*.pem
+*.key
+*.crt
+secrets.json
+
+# Node modules (if using frontend tools)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Package files
+*.tar.gz
+*.zip
+*.rar
+
+# Documentation builds
+docs/_build/
+
+# Translation files
+*.mo
+*.pot
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Redis dump file
+dump.rdb
+
+# Local development settings
+local.py
+settings_local.py

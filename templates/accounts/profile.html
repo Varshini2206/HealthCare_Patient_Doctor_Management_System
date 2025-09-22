@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Profile - HealthCare Management System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                {% if user.userprofile.avatar %}
+                    <img src="{{ user.userprofile.avatar.url }}" alt="Profile Picture" 
+                         class="img-fluid rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                {% else %}
+                    <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                         style="width: 150px; height: 150px;">
+                        <i class="fas fa-user text-white fa-3x"></i>
+                    </div>
+                {% endif %}
+                
+                <h4>{{ user.get_full_name|default:user.username }}</h4>
+                <p class="text-muted">{{ user.get_user_type_display }}</p>
+                
+                <div class="d-grid">
+                    <a href="{% url 'accounts:profile_update' %}" class="btn btn-primary">
+                        <i class="fas fa-edit"></i> Edit Profile
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-user"></i> Profile Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-4"><strong>First Name:</strong></div>
+                    <div class="col-md-8">{{ user.first_name|default:"Not provided" }}</div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-4"><strong>Last Name:</strong></div>
+                    <div class="col-md-8">{{ user.last_name|default:"Not provided" }}</div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-4"><strong>Email:</strong></div>
+                    <div class="col-md-8">{{ user.email }}</div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-4"><strong>Phone:</strong></div>
+                    <div class="col-md-8">{{ user.phone_number|default:"Not provided" }}</div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-4"><strong>User Type:</strong></div>
+                    <div class="col-md-8">
+                        <span class="badge bg-primary">{{ user.get_user_type_display }}</span>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-4"><strong>Date Joined:</strong></div>
+                    <div class="col-md-8">{{ user.date_joined|date:"F d, Y" }}</div>
+                </div>
+                
+                {% if user.userprofile.bio %}
+                <div class="row mb-3">
+                    <div class="col-md-4"><strong>Bio:</strong></div>
+                    <div class="col-md-8">{{ user.userprofile.bio }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5><i class="fas fa-bolt"></i> Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% if user.user_type == 'patient' %}
+                        <div class="col-md-6 mb-2">
+                            <a href="{% url 'patients:dashboard' %}" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-tachometer-alt"></i> Patient Dashboard
+                            </a>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <a href="{% url 'appointments:book' %}" class="btn btn-outline-success w-100">
+                                <i class="fas fa-calendar-plus"></i> Book Appointment
+                            </a>
+                        </div>
+                    {% elif user.user_type == 'doctor' %}
+                        <div class="col-md-6 mb-2">
+                            <a href="{% url 'doctors:dashboard' %}" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-tachometer-alt"></i> Doctor Dashboard
+                            </a>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <a href="{% url 'doctors:schedule' %}" class="btn btn-outline-info w-100">
+                                <i class="fas fa-calendar"></i> Manage Schedule
+                            </a>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="col-md-6 mb-2">
+                        <a href="{% url 'accounts:password_change' %}" class="btn btn-outline-warning w-100">
+                            <i class="fas fa-key"></i> Change Password
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

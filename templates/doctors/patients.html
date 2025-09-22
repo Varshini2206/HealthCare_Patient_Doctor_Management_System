@@ -1,0 +1,349 @@
+{% extends 'base.html' %}
+
+{% block title %}My Patients - HealthCare Management System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-users"></i> My Patients</h1>
+    <div>
+        <div class="input-group" style="width: 300px;">
+            <input type="text" class="form-control" placeholder="Search patients..." id="patientSearch">
+            <button class="btn btn-outline-secondary" type="button">
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Patient Statistics -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center border-primary">
+            <div class="card-body">
+                <h3 class="text-primary">156</h3>
+                <p class="mb-0">Total Patients</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center border-success">
+            <div class="card-body">
+                <h3 class="text-success">12</h3>
+                <p class="mb-0">New This Month</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center border-warning">
+            <div class="card-body">
+                <h3 class="text-warning">8</h3>
+                <p class="mb-0">Follow-up Due</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center border-info">
+            <div class="card-body">
+                <h3 class="text-info">5</h3>
+                <p class="mb-0">Critical Cases</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filter Tabs -->
+<ul class="nav nav-tabs mb-4" id="patientTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all-patients" type="button" role="tab">
+            <i class="fas fa-users"></i> All Patients (156)
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="recent-tab" data-bs-toggle="tab" data-bs-target="#recent-patients" type="button" role="tab">
+            <i class="fas fa-clock"></i> Recent (28)
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="followup-tab" data-bs-toggle="tab" data-bs-target="#followup-patients" type="button" role="tab">
+            <i class="fas fa-exclamation-circle"></i> Follow-up Due (8)
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="critical-tab" data-bs-toggle="tab" data-bs-target="#critical-patients" type="button" role="tab">
+            <i class="fas fa-exclamation-triangle"></i> Critical (5)
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content" id="patientTabContent">
+    <!-- All Patients -->
+    <div class="tab-pane fade show active" id="all-patients" role="tabpanel">
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Patient</th>
+                                <th>Age</th>
+                                <th>Last Visit</th>
+                                <th>Next Appointment</th>
+                                <th>Priority</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-circle bg-primary text-white me-3">JS</div>
+                                        <div>
+                                            <strong>John Smith</strong><br>
+                                            <small class="text-muted">ID: PAT001 | Male</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>45</td>
+                                <td>Dec 21, 2024</td>
+                                <td>
+                                    <span class="text-success">Jan 15, 2025</span><br>
+                                    <small class="text-muted">10:30 AM</small>
+                                </td>
+                                <td><span class="badge bg-success">Normal</span></td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button class="btn btn-sm btn-outline-primary" title="View Profile" data-bs-toggle="modal" data-bs-target="#patientModal">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-info" title="Medical History">
+                                            <i class="fas fa-file-medical"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-success" title="New Appointment">
+                                            <i class="fas fa-calendar-plus"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-warning" title="Send Message">
+                                            <i class="fas fa-envelope"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-circle bg-success text-white me-3">MJ</div>
+                                        <div>
+                                            <strong>Mary Johnson</strong><br>
+                                            <small class="text-muted">ID: PAT002 | Female</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>32</td>
+                                <td>Dec 20, 2024</td>
+                                <td>
+                                    <span class="text-muted">Not scheduled</span>
+                                </td>
+                                <td><span class="badge bg-warning">Follow-up</span></td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button class="btn btn-sm btn-outline-primary" title="View Profile">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-info" title="Medical History">
+                                            <i class="fas fa-file-medical"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-success" title="New Appointment">
+                                            <i class="fas fa-calendar-plus"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-warning" title="Send Message">
+                                            <i class="fas fa-envelope"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <tr class="table-danger">
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-circle bg-danger text-white me-3">RD</div>
+                                        <div>
+                                            <strong>Robert Davis</strong><br>
+                                            <small class="text-muted">ID: PAT003 | Male</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>58</td>
+                                <td>Dec 18, 2024</td>
+                                <td>
+                                    <span class="text-danger">Overdue</span><br>
+                                    <small class="text-muted">Dec 25, 2024</small>
+                                </td>
+                                <td><span class="badge bg-danger">Critical</span></td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button class="btn btn-sm btn-outline-primary" title="View Profile">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-info" title="Medical History">
+                                            <i class="fas fa-file-medical"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-danger" title="Urgent Contact">
+                                            <i class="fas fa-phone"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-warning" title="Send Message">
+                                            <i class="fas fa-envelope"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-circle bg-info text-white me-3">LW</div>
+                                        <div>
+                                            <strong>Lisa Wilson</strong><br>
+                                            <small class="text-muted">ID: PAT004 | Female</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>27</td>
+                                <td>Dec 15, 2024</td>
+                                <td>
+                                    <span class="text-success">Jan 10, 2025</span><br>
+                                    <small class="text-muted">2:00 PM</small>
+                                </td>
+                                <td><span class="badge bg-info">Monitoring</span></td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button class="btn btn-sm btn-outline-primary" title="View Profile">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-info" title="Medical History">
+                                            <i class="fas fa-file-medical"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-success" title="New Appointment">
+                                            <i class="fas fa-calendar-plus"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-warning" title="Send Message">
+                                            <i class="fas fa-envelope"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Pagination -->
+                <nav aria-label="Patients pagination" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item disabled">
+                            <span class="page-link">Previous</span>
+                        </li>
+                        <li class="page-item active">
+                            <span class="page-link">1</span>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="#">2</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="#">3</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="#">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Patients -->
+    <div class="tab-pane fade" id="recent-patients" role="tabpanel">
+        <div class="card">
+            <div class="card-body">
+                <p class="text-center text-muted">Patients seen in the last 30 days</p>
+                <!-- Same table structure with filtered data -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Follow-up Due -->
+    <div class="tab-pane fade" id="followup-patients" role="tabpanel">
+        <div class="card">
+            <div class="card-body">
+                <p class="text-center text-muted">Patients requiring follow-up appointments</p>
+                <!-- Same table structure with filtered data -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Critical Patients -->
+    <div class="tab-pane fade" id="critical-patients" role="tabpanel">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="fas fa-exclamation-triangle"></i> Critical Cases Requiring Immediate Attention</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-center text-muted">High priority patients needing urgent care</p>
+                <!-- Same table structure with critical patients only -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Patient Details Modal -->
+<div class="modal fade" id="patientModal" tabindex="-1" aria-labelledby="patientModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="patientModalLabel">
+                    <i class="fas fa-user"></i> Patient Details - John Smith
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-4 text-center">
+                        <div class="avatar-circle bg-primary text-white mx-auto mb-3" style="width: 80px; height: 80px; font-size: 24px;">JS</div>
+                        <h5>John Smith</h5>
+                        <p class="text-muted">Patient ID: PAT001</p>
+                    </div>
+                    <div class="col-md-8">
+                        <h6>Contact Information</h6>
+                        <p><strong>Email:</strong> john.smith@email.com</p>
+                        <p><strong>Phone:</strong> +1 (555) 123-4567</p>
+                        <p><strong>Address:</strong> 123 Main St, City, State 12345</p>
+                        
+                        <h6>Medical Information</h6>
+                        <p><strong>Age:</strong> 45 years</p>
+                        <p><strong>Blood Type:</strong> O+</p>
+                        <p><strong>Allergies:</strong> Penicillin, Peanuts</p>
+                        <p><strong>Emergency Contact:</strong> Jane Smith - +1 (555) 987-6543</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">View Full Medical History</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.avatar-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+}
+</style>
+{% endblock %}

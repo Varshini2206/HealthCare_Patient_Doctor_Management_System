@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+
+{% block title %}Lab Results - HealthCare Management System{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-flask"></i> Lab Results</h1>
+    <div>
+        <button class="btn btn-outline-primary me-2" data-bs-toggle="modal" data-bs-target="#shareModal">
+            <i class="fas fa-share"></i> Share with Doctor
+        </button>
+        <button class="btn btn-primary" onclick="window.print()">
+            <i class="fas fa-print"></i> Print Results
+        </button>
+    </div>
+</div>
+
+<!-- Recent Lab Results -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-primary">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-calendar-alt"></i> Latest Results - December 15, 2024</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h6 class="text-primary">Complete Blood Count (CBC)</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Test</th>
+                                        <th>Result</th>
+                                        <th>Normal Range</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>White Blood Cells</td>
+                                        <td><strong>7.2</strong> k/μL</td>
+                                        <td>4.0 - 11.0 k/μL</td>
+                                        <td><span class="badge bg-success">Normal</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Red Blood Cells</td>
+                                        <td><strong>4.5</strong> M/μL</td>
+                                        <td>4.2 - 5.4 M/μL</td>
+                                        <td><span class="badge bg-success">Normal</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Hemoglobin</td>
+                                        <td><strong>14.2</strong> g/dL</td>
+                                        <td>12.0 - 16.0 g/dL</td>
+                                        <td><span class="badge bg-success">Normal</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Platelets</td>
+                                        <td><strong>280</strong> k/μL</td>
+                                        <td>150 - 400 k/μL</td>
+                                        <td><span class="badge bg-success">Normal</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <h6 class="text-primary mt-4">Lipid Panel</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Test</th>
+                                        <th>Result</th>
+                                        <th>Normal Range</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Total Cholesterol</td>
+                                        <td><strong>195</strong> mg/dL</td>
+                                        <td>&lt; 200 mg/dL</td>
+                                        <td><span class="badge bg-success">Normal</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>HDL Cholesterol</td>
+                                        <td><strong>55</strong> mg/dL</td>
+                                        <td>&gt; 40 mg/dL</td>
+                                        <td><span class="badge bg-success">Good</span></td>
+                                    </tr>
+                                    <tr class="table-warning">
+                                        <td>LDL Cholesterol</td>
+                                        <td><strong>125</strong> mg/dL</td>
+                                        <td>&lt; 100 mg/dL</td>
+                                        <td><span class="badge bg-warning">Borderline</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Triglycerides</td>
+                                        <td><strong>98</strong> mg/dL</td>
+                                        <td>&lt; 150 mg/dL</td>
+                                        <td><span class="badge bg-success">Normal</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="card bg-light h-100">
+                            <div class="card-header">
+                                <h6 class="mb-0">Test Summary</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="text-center mb-3">
+                                    <div class="progress-circle mx-auto mb-2" style="width: 80px; height: 80px;">
+                                        <canvas id="healthScoreChart" width="80" height="80"></canvas>
+                                    </div>
+                                    <h4 class="text-success">Good</h4>
+                                    <p class="text-muted small">Overall Health Score</p>
+                                </div>
+                                
+                                <hr>
+                                
+                                <div class="mb-2">
+                                    <small class="text-success">
+                                        <i class="fas fa-check-circle"></i> 7 tests normal
+                                    </small>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-warning">
+                                        <i class="fas fa-exclamation-circle"></i> 1 test borderline
+                                    </small>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar"></i> Tested on Dec 15, 2024
+                                    </small>
+                                </div>
+                                
+                                <hr>
+                                
+                                <div class="d-grid">
+                                    <button class="btn btn-outline-primary btn-sm mb-2">
+                                        <i class="fas fa-download"></i> Download PDF
+                                    </button>
+                                    <button class="btn btn-outline-info btn-sm">
+                                        <i class="fas fa-chart-line"></i> View Trends
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Previous Lab Results -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-history"></i> Previous Lab Results</h5>
+            </div>
+            <div class="card-body">
+                <div class="accordion" id="previousResultsAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingOne">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
+                                <div class="me-auto">
+                                    <strong>Annual Physical - September 20, 2024</strong><br>
+                                    <small class="text-muted">Complete Metabolic Panel, CBC</small>
+                                </div>
+                                <span class="badge bg-success me-2">All Normal</span>
+                            </button>
+                        </h2>
+                        <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#previousResultsAccordion">
+                            <div class="accordion-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6>Complete Blood Count</h6>
+                                        <ul class="list-unstyled">
+                                            <li>WBC: 6.8 k/μL <span class="badge bg-success">Normal</span></li>
+                                            <li>RBC: 4.3 M/μL <span class="badge bg-success">Normal</span></li>
+                                            <li>Hemoglobin: 13.9 g/dL <span class="badge bg-success">Normal</span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6>Metabolic Panel</h6>
+                                        <ul class="list-unstyled">
+                                            <li>Glucose: 92 mg/dL <span class="badge bg-success">Normal</span></li>
+                                            <li>Creatinine: 1.0 mg/dL <span class="badge bg-success">Normal</span></li>
+                                            <li>BUN: 18 mg/dL <span class="badge bg-success">Normal</span></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <button class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-download"></i> Download Full Report
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingTwo">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">
+                                <div class="me-auto">
+                                    <strong>Lipid Screening - June 10, 2024</strong><br>
+                                    <small class="text-muted">Cholesterol Panel</small>
+                                </div>
+                                <span class="badge bg-warning me-2">1 Abnormal</span>
+                            </button>
+                        </h2>
+                        <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#previousResultsAccordion">
+                            <div class="accordion-body">
+                                <h6>Lipid Panel Results</h6>
+                                <ul class="list-unstyled">
+                                    <li>Total Cholesterol: 215 mg/dL <span class="badge bg-warning">High</span></li>
+                                    <li>HDL: 45 mg/dL <span class="badge bg-success">Normal</span></li>
+                                    <li>LDL: 145 mg/dL <span class="badge bg-danger">High</span></li>
+                                    <li>Triglycerides: 125 mg/dL <span class="badge bg-success">Normal</span></li>
+                                </ul>
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <strong>Doctor's Note:</strong> Continue diet modifications and increase exercise. Recheck in 3 months.
+                                </div>
+                                <button class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-download"></i> Download Full Report
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

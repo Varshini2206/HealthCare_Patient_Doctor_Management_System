@@ -1,0 +1,30 @@
+{% load static %}
+
+<div class="activity-feed">
+    {% for activity in recent_activities %}
+    <div class="activity-item">
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <strong class="text-primary">{{ activity.type }}</strong>
+                <p class="mb-1">{{ activity.description }}</p>
+                <small class="activity-time">{{ activity.timestamp|timesince }} ago</small>
+            </div>
+            <div>
+                {% if activity.type == 'appointment' %}
+                    <i class="fas fa-calendar-alt text-info"></i>
+                {% elif activity.type == 'patient' %}
+                    <i class="fas fa-user text-success"></i>
+                {% elif activity.type == 'medical_record' %}
+                    <i class="fas fa-file-medical text-warning"></i>
+                {% else %}
+                    <i class="fas fa-bell text-secondary"></i>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="activity-item text-center">
+        <p class="text-muted mb-0">No recent activities</p>
+    </div>
+    {% endfor %}
+</div>

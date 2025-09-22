@@ -1,0 +1,359 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Appointment Details - VB Healthcare{% endblock %}
+
+{% block extra_css %}
+<style>
+    .appointment-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+        border-radius: 15px;
+    }
+
+    .appointment-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid #e3e6f0;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .appointment-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+
+    .status-badge {
+        padding: 8px 16px;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-completed {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+    }
+
+    .status-scheduled {
+        background: linear-gradient(135deg, #007bff, #6610f2);
+        color: white;
+    }
+
+    .status-confirmed {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+    }
+
+    .status-pending {
+        background: linear-gradient(135deg, #ffc107, #fd7e14);
+        color: white;
+    }
+
+    .status-cancelled {
+        background: linear-gradient(135deg, #dc3545, #e83e8c);
+        color: white;
+    }
+
+    .detail-section {
+        margin-bottom: 2rem;
+    }
+
+    .detail-section h4 {
+        color: #5a5c69;
+        border-bottom: 3px solid #4e73df;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+
+    .info-row {
+        display: flex;
+        margin-bottom: 1rem;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #eaecf4;
+    }
+
+    .info-label {
+        font-weight: 600;
+        color: #5a5c69;
+        min-width: 150px;
+        margin-right: 1rem;
+    }
+
+    .info-value {
+        color: #858796;
+        flex: 1;
+    }
+
+    .doctor-info {
+        background: linear-gradient(135deg, #f8f9fc, #e3e6f0);
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+    }
+
+    .notes-section {
+        background: #f8f9fc;
+        padding: 1.5rem;
+        border-radius: 10px;
+        border-left: 4px solid #4e73df;
+    }
+
+    .back-btn {
+        background: linear-gradient(135deg, #6c757d, #495057);
+        border: none;
+        color: white;
+        padding: 10px 25px;
+        border-radius: 25px;
+        text-decoration: none;
+        display: inline-block;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+
+    .back-btn:hover {
+        background: linear-gradient(135deg, #495057, #343a40);
+        color: white;
+        text-decoration: none;
+        transform: translateY(-2px);
+    }
+
+    .appointment-time {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #4e73df;
+    }
+
+    .complaint-text {
+        font-style: italic;
+        color: #6c757d;
+        background: #fff;
+        padding: 1rem;
+        border-radius: 8px;
+        border: 1px solid #e3e6f0;
+    }
+
+    .follow-up-alert {
+        background: linear-gradient(135deg, #17a2b8, #138496);
+        color: white;
+        padding: 1rem;
+        border-radius: 10px;
+        margin-top: 1rem;
+    }
+
+    @media (max-width: 768px) {
+        .appointment-header {
+            padding: 1.5rem;
+            margin: 0 -15px 2rem;
+            border-radius: 0;
+        }
+        
+        .appointment-card {
+            margin: 0 -15px 1rem;
+            border-radius: 0;
+            padding: 1.5rem;
+        }
+        
+        .info-row {
+            flex-direction: column;
+        }
+        
+        .info-label {
+            min-width: auto;
+            margin-bottom: 0.25rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <a href="{% url 'patients:appointments' %}" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Back to Appointments
+    </a>
+
+    <div class="appointment-header text-center">
+        <h1><i class="fas fa-calendar-check"></i> Appointment Details</h1>
+        <p class="mb-0">Complete information about your healthcare visit</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="appointment-card">
+                <!-- Appointment Status -->
+                <div class="text-center mb-4">
+                    <span class="status-badge status-{{ appointment.status|lower }}">
+                        {% if appointment.status == 'completed' %}
+                            <i class="fas fa-check-circle"></i> Completed
+                        {% elif appointment.status == 'scheduled' %}
+                            <i class="fas fa-calendar"></i> Scheduled
+                        {% elif appointment.status == 'confirmed' %}
+                            <i class="fas fa-check"></i> Confirmed
+                        {% elif appointment.status == 'pending' %}
+                            <i class="fas fa-clock"></i> Pending
+                        {% elif appointment.status == 'cancelled' %}
+                            <i class="fas fa-times-circle"></i> Cancelled
+                        {% endif %}
+                    </span>
+                </div>
+
+                <!-- Basic Appointment Info -->
+                <div class="detail-section">
+                    <h4><i class="fas fa-info-circle"></i> Appointment Information</h4>
+                    <div class="info-row">
+                        <div class="info-label"><i class="fas fa-calendar-alt"></i> Date:</div>
+                        <div class="info-value">{{ appointment.appointment_date|date:"F d, Y" }}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label"><i class="fas fa-clock"></i> Time:</div>
+                        <div class="info-value appointment-time">{{ appointment.appointment_time|time:"g:i A" }}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label"><i class="fas fa-user-md"></i> Doctor:</div>
+                        <div class="info-value">{{ appointment.doctor.user.get_full_name }}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label"><i class="fas fa-stethoscope"></i> Specialization:</div>
+                        <div class="info-value">{{ appointment.doctor.specialization|default:"General Practice" }}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label"><i class="fas fa-map-marker-alt"></i> Department:</div>
+                        <div class="info-value">{{ appointment.doctor.department|default:"General Medicine" }}</div>
+                    </div>
+                </div>
+
+                <!-- Doctor Information -->
+                {% if appointment.doctor %}
+                <div class="detail-section">
+                    <h4><i class="fas fa-user-md"></i> Doctor Information</h4>
+                    <div class="doctor-info">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h5>{{ appointment.doctor.user.get_full_name }}</h5>
+                                <p><strong>Specialization:</strong> {{ appointment.doctor.specialization|default:"General Practice" }}</p>
+                                <p><strong>Department:</strong> {{ appointment.doctor.department|default:"General Medicine" }}</p>
+                                <p><strong>Phone:</strong> {{ appointment.doctor.phone|default:"Not provided" }}</p>
+                                <p><strong>Email:</strong> {{ appointment.doctor.user.email }}</p>
+                            </div>
+                            <div class="col-md-4 text-center">
+                                <div class="doctor-avatar">
+                                    <i class="fas fa-user-md" style="font-size: 4rem; color: #4e73df;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Chief Complaint -->
+                {% if appointment.chief_complaint %}
+                <div class="detail-section">
+                    <h4><i class="fas fa-notes-medical"></i> Reason for Visit</h4>
+                    <div class="complaint-text">
+                        {{ appointment.chief_complaint }}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Doctor's Notes (for completed appointments) -->
+                {% if appointment.status == 'completed' and appointment.doctor_notes %}
+                <div class="detail-section">
+                    <h4><i class="fas fa-file-medical-alt"></i> Doctor's Notes</h4>
+                    <div class="notes-section">
+                        {{ appointment.doctor_notes|linebreaks }}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Follow-up Instructions -->
+                {% if appointment.follow_up_required %}
+                <div class="detail-section">
+                    <h4><i class="fas fa-clipboard-check"></i> Follow-up Care</h4>
+                    {% if appointment.follow_up_instructions %}
+                    <div class="notes-section">
+                        <h6>Follow-up Instructions:</h6>
+                        {{ appointment.follow_up_instructions|linebreaks }}
+                    </div>
+                    {% endif %}
+                    <div class="follow-up-alert">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <strong>Follow-up Required:</strong> Please schedule a follow-up appointment as recommended by your doctor.
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Prescription Information -->
+                {% if appointment.prescription %}
+                <div class="detail-section">
+                    <h4><i class="fas fa-pills"></i> Prescription</h4>
+                    <div class="notes-section">
+                        {{ appointment.prescription|linebreaks }}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Additional Information -->
+                <div class="detail-section">
+                    <h4><i class="fas fa-clipboard-list"></i> Additional Information</h4>
+                    <div class="info-row">
+                        <div class="info-label"><i class="fas fa-calendar-plus"></i> Booked on:</div>
+                        <div class="info-value">{{ appointment.created_at|date:"F d, Y g:i A"|default:"Not available" }}</div>
+                    </div>
+                    {% if appointment.status == 'completed' %}
+                    <div class="info-row">
+                        <div class="info-label"><i class="fas fa-check-circle"></i> Completed on:</div>
+                        <div class="info-value">{{ appointment.updated_at|date:"F d, Y g:i A"|default:"Not available" }}</div>
+                    </div>
+                    {% endif %}
+                    {% if appointment.reschedule_notes %}
+                    <div class="info-row">
+                        <div class="info-label"><i class="fas fa-calendar-alt"></i> Reschedule Notes:</div>
+                        <div class="info-value">{{ appointment.reschedule_notes }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="text-center mt-4">
+                    <a href="{% url 'patients:appointments' %}" class="btn btn-secondary me-3">
+                        <i class="fas fa-list"></i> View All Appointments
+                    </a>
+                    {% if appointment.status == 'scheduled' or appointment.status == 'confirmed' %}
+                    <a href="{% url 'patients:book_appointment' %}" class="btn btn-primary">
+                        <i class="fas fa-calendar-plus"></i> Book Another Appointment
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Add smooth animations
+    $('.appointment-card').hide().fadeIn(800);
+    
+    // Add hover effects to info rows
+    $('.info-row').hover(
+        function() {
+            $(this).css('background-color', '#f8f9fc');
+        },
+        function() {
+            $(this).css('background-color', 'transparent');
+        }
+    );
+});
+</script>
+{% endblock %}
