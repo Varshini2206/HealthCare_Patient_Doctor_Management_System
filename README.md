@@ -2,6 +2,8 @@ HealthCare Patient Management System
 
 A comprehensive healthcare management platform built with Django that facilitates seamless interaction between patients and doctors. This system provides a complete solution for appointment scheduling, medical record management, prescription handling, and patient care coordination.
 
+Deployment Link : https://healthcare-patient-management-system-ixbv.onrender.com/
+
 Project Overview
 
 The HealthCare Patient Management System is designed to streamline healthcare operations by providing separate dashboards for patients and doctors. Patients can book appointments, view their medical history, manage prescriptions, and access important documents. Doctors can manage their schedules, view patient profiles, provide feedback, and maintain comprehensive medical records.
