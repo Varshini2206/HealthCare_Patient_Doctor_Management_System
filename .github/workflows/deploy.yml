@@ -145,51 +145,105 @@ jobs:
                   final_content = re.sub(r'{%\s*block\s+[^%]+%}', '', final_content)
                   final_content = re.sub(r'{%\s*endblock\s*%}', '', final_content)
                   
-                  # Replace URL patterns with static links
+                  # Replace URL patterns with static links - COMPREHENSIVE MAPPING
                   url_replacements = {
+                      # Main pages
                       r'{%\s*url\s+[\'"]home[\'"]\s*%}': 'index.html',
-                      r'{%\s*url\s+[\'"]about[\'"]\s*%}': 'about.html',
+                      r'{%\s*url\s+[\'"]about[\'"]\s*%}': 'about.html',  
                       r'{%\s*url\s+[\'"]privacy_policy[\'"]\s*%}': 'privacy_policy.html',
                       r'{%\s*url\s+[\'"]terms_of_service[\'"]\s*%}': 'terms_of_service.html',
+                      
+                      # Account URLs
                       r'{%\s*url\s+[\'"]accounts:login[\'"]\s*%}': 'accounts-login.html',
                       r'{%\s*url\s+[\'"]accounts:register[\'"]\s*%}': 'accounts-register.html',
                       r'{%\s*url\s+[\'"]accounts:profile[\'"]\s*%}': 'accounts-profile.html',
                       r'{%\s*url\s+[\'"]accounts:profile_update[\'"]\s*%}': 'accounts-profile_update.html',
+                      r'{%\s*url\s+[\'"]accounts:logout[\'"]\s*%}': 'index.html',
+                      
+                      # Patient URLs
                       r'{%\s*url\s+[\'"]patients:dashboard[\'"]\s*%}': 'patients-dashboard.html',
                       r'{%\s*url\s+[\'"]patients:appointments[\'"]\s*%}': 'patients-appointments.html',
                       r'{%\s*url\s+[\'"]patients:medical_records[\'"]\s*%}': 'patients-medical_records.html',
+                      r'{%\s*url\s+[\'"]patients:documents[\'"]\s*%}': 'patients-documents.html',
+                      r'{%\s*url\s+[\'"]patients:medical_history[\'"]\s*%}': 'patients-medical_history.html',
+                      
+                      # Doctor URLs  
                       r'{%\s*url\s+[\'"]doctors:dashboard[\'"]\s*%}': 'doctors-dashboard.html',
                       r'{%\s*url\s+[\'"]doctors:appointments[\'"]\s*%}': 'doctors-appointments.html',
                       r'{%\s*url\s+[\'"]doctors:patients[\'"]\s*%}': 'doctors-patients.html',
+                      r'{%\s*url\s+[\'"]doctors:schedule[\'"]\s*%}': 'doctors-schedule.html',
+                      r'{%\s*url\s+[\'"]doctors:patient_profile[\'"]\s*%}': 'doctors-patient_profile.html',
+                      
+                      # Appointment URLs
                       r'{%\s*url\s+[\'"]appointments:book[\'"]\s*%}': 'appointments-book.html',
                       r'{%\s*url\s+[\'"]appointments:list[\'"]\s*%}': 'appointments-list.html',
+                      r'{%\s*url\s+[\'"]appointments:detail[\'"]\s*%}': 'appointments-detail.html',
+                      
+                      # Medical Records URLs
                       r'{%\s*url\s+[\'"]medical_records:list[\'"]\s*%}': 'medical_records-list.html',
+                      
+                      # Service URLs
+                      r'{%\s*url\s+[\'"]service_appointments[\'"]\s*%}': 'patients-appointments.html',
+                      r'{%\s*url\s+[\'"]service_medical_records[\'"]\s*%}': 'patients-medical_records.html',
+                      r'{%\s*url\s+[\'"]service_telemedicine[\'"]\s*%}': 'telemedicine.html',
                   }
                   
                   for pattern, replacement in url_replacements.items():
                       final_content = re.sub(pattern, replacement, final_content)
                   
-                  # Handle conditional statements and loops
+                  # Handle conditional statements and loops - COMPLETELY REMOVE ALL DJANGO SYNTAX
                   final_content = re.sub(r'{%\s*csrf_token\s*%}', '', final_content)
                   
-                  # Handle if statements - keep content inside
-                  final_content = re.sub(r'{%\s*if\s+user\.is_authenticated\s*%}', '<!-- User authenticated -->', final_content)
-                  final_content = re.sub(r'{%\s*if\s+[^%]+%}', '<!-- Condition -->', final_content)
-                  final_content = re.sub(r'{%\s*else\s*%}', '<!-- Else -->', final_content)
-                  final_content = re.sub(r'{%\s*endif\s*%}', '<!-- End condition -->', final_content)
+                  # Process conditional blocks to show default content (first branch)
+                  # This handles if/elif/else blocks by keeping the first conditional content
+                  pattern = r'{%\s*if\s+[^%]+%}(.*?){%\s*(?:elif\s+[^%]+%}.*?)*(?:{%\s*else\s*%}.*?)?{%\s*endif\s*%}'
+                  def process_conditional(match):
+                      content = match.group(1)
+                      # Remove any nested Django tags from the content
+                      content = re.sub(r'{%[^%]*%}', '', content)
+                      content = re.sub(r'{{[^}]*}}', '', content)
+                      return content
                   
-                  # Handle loops - keep content and add sample data
-                  final_content = re.sub(r'{%\s*for\s+appointment\s+in\s+appointments\s*%}', 
-                                        '<!-- Sample appointments -->', final_content)
-                  final_content = re.sub(r'{%\s*for\s+patient\s+in\s+patients\s*%}', 
-                                        '<!-- Sample patients -->', final_content)
-                  final_content = re.sub(r'{%\s*for\s+[^%]+%}', '<!-- Sample data loop -->', final_content)
-                  final_content = re.sub(r'{%\s*empty\s*%}', '<!-- No data message -->', final_content)
-                  final_content = re.sub(r'{%\s*endfor\s*%}', '<!-- End loop -->', final_content)
+                  final_content = re.sub(pattern, process_conditional, final_content, flags=re.DOTALL)
                   
-                  # Remove comments and other Django syntax
+                  # Remove remaining individual Django conditional tags
+                  final_content = re.sub(r'{%\s*if\s+[^%]+%}', '', final_content)
+                  final_content = re.sub(r'{%\s*elif\s+[^%]+%}', '', final_content)
+                  final_content = re.sub(r'{%\s*else\s*%}', '', final_content)
+                  final_content = re.sub(r'{%\s*endif\s*%}', '', final_content)
+                  
+                  # Process for loops to show sample data
+                  for_pattern = r'{%\s*for\s+[^%]+%}(.*?){%\s*(?:empty\s*%}.*?)?{%\s*endfor\s*%}'
+                  def process_for_loop(match):
+                      loop_content = match.group(1)
+                      # Clean Django syntax from loop content
+                      loop_content = re.sub(r'{%[^%]*%}', '', loop_content)
+                      loop_content = re.sub(r'{{[^}]*}}', 'Sample Data', loop_content)
+                      # Repeat the content 2-3 times to show sample data
+                      return loop_content + loop_content + loop_content
+                  
+                  final_content = re.sub(for_pattern, process_for_loop, final_content, flags=re.DOTALL)
+                  
+                  # Remove remaining individual for loop tags
+                  final_content = re.sub(r'{%\s*for\s+[^%]+%}', '', final_content)
+                  final_content = re.sub(r'{%\s*empty\s*%}', '', final_content)
+                  final_content = re.sub(r'{%\s*endfor\s*%}', '', final_content)
+                  
+                  # Remove ALL other Django template tags
+                  final_content = re.sub(r'{%\s*with\s+[^%]+%}', '', final_content)
+                  final_content = re.sub(r'{%\s*endwith\s*%}', '', final_content)
                   final_content = re.sub(r'{%\s*comment\s*%}.*?{%\s*endcomment\s*%}', '', final_content, flags=re.DOTALL)
-                  final_content = re.sub(r'{%[^%]*%}', '', final_content)  # Remove any remaining Django tags
+                  final_content = re.sub(r'{%\s*spaceless\s*%}', '', final_content)
+                  final_content = re.sub(r'{%\s*endspaceless\s*%}', '', final_content)
+                  final_content = re.sub(r'{%\s*verbatim\s*%}', '', final_content)
+                  final_content = re.sub(r'{%\s*endverbatim\s*%}', '', final_content)
+                  
+                  # Remove ANY remaining Django template tags
+                  final_content = re.sub(r'{%[^%]*%}', '', final_content)
+                  
+                  # Clean up extra whitespace left by removed tags
+                  final_content = re.sub(r'\n\s*\n\s*\n', '\n\n', final_content)
+                  final_content = re.sub(r'>\s*<', '><', final_content)
                   
                   # Replace template variables with realistic demo data
                   final_content = re.sub(r'{{[^}]*user\.first_name[^}]*}}', 'John', final_content)
@@ -234,6 +288,17 @@ jobs:
                   
                   # Remove any remaining template variables
                   final_content = re.sub(r'{{[^}]*}}', '', final_content)
+                  
+                  # FINAL AGGRESSIVE CLEANUP - Remove ANY leftover Django syntax
+                  final_content = re.sub(r'{%[^%]*%}', '', final_content)  # Any remaining template tags
+                  final_content = re.sub(r'{{[^}]*}}', '', final_content)  # Any remaining variables
+                  final_content = re.sub(r'<script[^>]*src="[^"]*{[^"]*"[^>]*></script>', '', final_content)  # Remove broken scripts
+                  
+                  # Clean up broken HTML and empty elements left by Django syntax removal
+                  final_content = re.sub(r'<[^>]*{[^>]*>', '', final_content)  # Remove broken tags with Django syntax
+                  final_content = re.sub(r'>\s*</[^>]*>', '></\g<1>>', final_content)  # Fix empty tags
+                  final_content = re.sub(r'\s+', ' ', final_content)  # Normalize whitespace
+                  final_content = re.sub(r'>\s+<', '><', final_content)  # Remove extra spaces between tags
                   
                   # Create output directory
                   os.makedirs(os.path.dirname(output_path), exist_ok=True)
