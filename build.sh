@@ -15,6 +15,9 @@ pip install -r requirements.txt
 echo "📦 Installing production dependencies..."
 pip install gunicorn whitenoise dj-database-url psycopg2-binary
 
+echo "🗃️ Creating static directories..."
+mkdir -p static
+
 echo "🗃️ Collecting static files..."
 python manage.py collectstatic --no-input
 

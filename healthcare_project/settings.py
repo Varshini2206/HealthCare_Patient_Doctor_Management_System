@@ -104,21 +104,25 @@ WSGI_APPLICATION = 'healthcare_project.wsgi.application'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 # Database Configuration - Development and Production
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DB_NAME', default='healthcare_db'),
-        'USER': config('DB_USER', default='postgres'),
-        'PASSWORD': config('DB_PASSWORD', default=''),
-        'HOST': config('DB_HOST', default='localhost'),
-        'PORT': config('DB_PORT', default='5432'),
-    }
-}
-
-# Override with DATABASE_URL if available (Render provides this)
+# Use DATABASE_URL if available (Render provides this), otherwise use local config
 database_url = config('DATABASE_URL', default=None)
 if database_url:
-    DATABASES['default'] = dj_database_url.parse(database_url)
+    # Production: Use Render's PostgreSQL database
+    DATABASES = {
+        'default': dj_database_url.parse(database_url)
+    }
+else:
+    # Development: Use local PostgreSQL
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': config('DB_NAME', default='healthcare_db'),
+            'USER': config('DB_USER', default='postgres'),
+            'PASSWORD': config('DB_PASSWORD', default=''),
+            'HOST': config('DB_HOST', default='localhost'),
+            'PORT': config('DB_PORT', default='5432'),
+        }
+    }
 
 
 # Password validation
