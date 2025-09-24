@@ -36,13 +36,29 @@ jobs:
           # Create output directory
           mkdir -p docs
           
-          # Copy static files
-          cp -r static docs/
+          # Copy static files if they exist
+          if [ -d "static" ]; then
+            cp -r static docs/
+          else
+            echo "Static directory not found, creating empty one"
+            mkdir -p docs/static
+          fi
           
           # Copy media files if they exist
           if [ -d "media" ]; then
             cp -r media docs/
           fi
+          
+          # Copy demo images if they exist
+          if [ -d "HealthCare Patient and Doctor Demo" ]; then
+            cp -r "HealthCare Patient and Doctor Demo" docs/
+          fi
+          
+          # List current directory contents for debugging
+          echo "Current directory contents:"
+          ls -la
+          echo "Templates directory contents:"
+          ls -la templates/ || echo "Templates directory not found"
           
           # Convert Django templates to static HTML
           python3 << 'EOF'
@@ -65,6 +81,9 @@ jobs:
                   
                   # Replace {% static %} with relative paths
                   content = re.sub(r'{%\s*static\s+[\'"]([^\'"]+)[\'"]\s*%}', r'static/\1', content)
+                  
+                  # Replace media URLs
+                  content = re.sub(r'{{[^}]*MEDIA_URL[^}]*}}([^"\'<>\s]+)', r'media/\1', content)
                   
                   # Replace common {% url %} patterns with static links
                   url_mappings = {
@@ -92,11 +111,17 @@ jobs:
                   content = re.sub(r'{%\s*comment\s*%}.*?{%\s*endcomment\s*%}', '', content, flags=re.DOTALL)
                   
                   # Replace template variables with dummy content
+                  content = re.sub(r'{{[^}]*user[^}]*name[^}]*}}', 'John Patient', content)
                   content = re.sub(r'{{[^}]*user[^}]*}}', 'Demo User', content)
                   content = re.sub(r'{{[^}]*name[^}]*}}', 'John Doe', content)
                   content = re.sub(r'{{[^}]*title[^}]*}}', 'Healthcare Management', content)
                   content = re.sub(r'{{[^}]*count[^}]*}}', '5', content)
+                  content = re.sub(r'{{[^}]*total[^}]*}}', '12', content)
+                  content = re.sub(r'{{[^}]*pending[^}]*}}', '3', content)
+                  content = re.sub(r'{{[^}]*completed[^}]*}}', '8', content)
                   content = re.sub(r'{{[^}]*date[^}]*}}', '2025-09-24', content)
+                  content = re.sub(r'{{[^}]*phone[^}]*}}', '+1 (555) 123-4567', content)
+                  content = re.sub(r'{{[^}]*email[^}]*}}', 'demo@vbhealthcare.com', content)
                   content = re.sub(r'{{[^}]*}}', '', content)  # Remove remaining variables
                   
                   # Ensure we have proper HTML structure
@@ -279,8 +304,35 @@ jobs:
           print("✓ Created navigation.html with links to all pages")
           EOF
           
+          # Create a README for the docs folder
+          cat > docs/README.md << 'MDEOF'
+          # VB Healthcare Management System - Static Demo
+          
+          This is a static version of the Healthcare Management System deployed on GitHub Pages.
+          All Django templates have been converted to static HTML for demonstration purposes.
+          
+          ## Available Pages
+          
+          - **Home**: index.html - Main landing page
+          - **Navigation**: navigation.html - Links to all pages
+          - **Patient Dashboard**: patients-dashboard.html - Patient interface
+          - **Doctor Dashboard**: doctors-dashboard.html - Doctor interface
+          - **Appointments**: appointments.html - Appointment management
+          - **Medical Records**: medical-records.html - Patient records
+          - **About**: about.html - Company information
+          
+          All pages are accessible without authentication for demo purposes.
+          
+          ## Live Demo
+          
+          Visit: https://buthuruvenkatareddy.github.io/HealthCare_Patient_Management_System/
+          
+          © 2025 Venkat Buthuru. All rights reserved.
+          MDEOF
+          
           echo "Build completed! Static site ready in docs/ directory"
-          ls -la docs/
+          echo "Files created:"
+          ls -la docs/ | head -20
           
       - name: Setup Pages
         uses: actions/configure-pages@v4
