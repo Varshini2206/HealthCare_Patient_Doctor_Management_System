@@ -44,12 +44,15 @@ if not User.objects.filter(username='patient_demo').exists():
         email='patient@demo.com',
         password='demo123',
         first_name='John',
-        last_name='Patient'
+        last_name='Patient',
+        user_type='patient',
+        phone_number='+1234567890'
     )
     UserProfile.objects.create(
         user=patient_user,
-        user_type='patient',
-        phone='+1234567890'
+        emergency_contact_name='Jane Patient',
+        emergency_contact_phone='+1234567899',
+        emergency_contact_relationship='Spouse'
     )
     print("✅ Created demo patient")
 
@@ -60,12 +63,15 @@ if not User.objects.filter(username='doctor_demo').exists():
         email='doctor@demo.com', 
         password='demo123',
         first_name='Dr. Sarah',
-        last_name='Smith'
+        last_name='Smith',
+        user_type='doctor',
+        phone_number='+1234567891'
     )
     UserProfile.objects.create(
         user=doctor_user,
-        user_type='doctor',
-        phone='+1234567891'
+        emergency_contact_name='Medical Center',
+        emergency_contact_phone='+1234567800',
+        emergency_contact_relationship='Workplace'
     )
     print("✅ Created demo doctor")
 
