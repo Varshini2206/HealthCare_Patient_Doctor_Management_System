@@ -1,0 +1,295 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          
+      - name: Build static site from Django templates
+        run: |
+          # Create output directory
+          mkdir -p docs
+          
+          # Copy static files
+          cp -r static docs/
+          
+          # Copy media files if they exist
+          if [ -d "media" ]; then
+            cp -r media docs/
+          fi
+          
+          # Convert Django templates to static HTML
+          python3 << 'EOF'
+          import os
+          import re
+          import shutil
+          from pathlib import Path
+          
+          def convert_django_template_to_static(template_path, output_path):
+              """Convert Django template to static HTML by removing Django syntax"""
+              try:
+                  with open(template_path, 'r', encoding='utf-8') as f:
+                      content = f.read()
+                  
+                  # Remove Django template tags
+                  content = re.sub(r'{%\s*load\s+[^%]+%}', '', content)
+                  content = re.sub(r'{%\s*extends\s+[^%]+%}', '', content)
+                  content = re.sub(r'{%\s*block\s+[^%]+%}', '', content)
+                  content = re.sub(r'{%\s*endblock\s*%}', '', content)
+                  
+                  # Replace {% static %} with relative paths
+                  content = re.sub(r'{%\s*static\s+[\'"]([^\'"]+)[\'"]\s*%}', r'static/\1', content)
+                  
+                  # Replace common {% url %} patterns with static links
+                  url_mappings = {
+                      r'{%\s*url\s+[\'"]home[\'"]\s*%}': 'index.html',
+                      r'{%\s*url\s+[\'"]about[\'"]\s*%}': 'about.html',
+                      r'{%\s*url\s+[\'"]accounts:login[\'"]\s*%}': 'login.html',
+                      r'{%\s*url\s+[\'"]accounts:register[\'"]\s*%}': 'register.html',
+                      r'{%\s*url\s+[\'"]accounts:profile[\'"]\s*%}': 'profile.html',
+                      r'{%\s*url\s+[\'"]patients:dashboard[\'"]\s*%}': 'patient-dashboard.html',
+                      r'{%\s*url\s+[\'"]doctors:dashboard[\'"]\s*%}': 'doctor-dashboard.html',
+                      r'{%\s*url\s+[\'"]appointments:book[\'"]\s*%}': 'book-appointment.html',
+                      r'{%\s*url\s+[\'"]appointments:list[\'"]\s*%}': 'appointments.html',
+                      r'{%\s*url\s+[\'"]medical_records:list[\'"]\s*%}': 'medical-records.html',
+                  }
+                  
+                  for pattern, replacement in url_mappings.items():
+                      content = re.sub(pattern, replacement, content)
+                  
+                  # Remove other Django template syntax but keep the content
+                  content = re.sub(r'{%\s*csrf_token\s*%}', '', content)
+                  content = re.sub(r'{%\s*if\s+[^%]+%}', '', content)
+                  content = re.sub(r'{%\s*endif\s*%}', '', content)
+                  content = re.sub(r'{%\s*for\s+[^%]+%}', '', content)
+                  content = re.sub(r'{%\s*endfor\s*%}', '', content)
+                  content = re.sub(r'{%\s*comment\s*%}.*?{%\s*endcomment\s*%}', '', content, flags=re.DOTALL)
+                  
+                  # Replace template variables with dummy content
+                  content = re.sub(r'{{[^}]*user[^}]*}}', 'Demo User', content)
+                  content = re.sub(r'{{[^}]*name[^}]*}}', 'John Doe', content)
+                  content = re.sub(r'{{[^}]*title[^}]*}}', 'Healthcare Management', content)
+                  content = re.sub(r'{{[^}]*count[^}]*}}', '5', content)
+                  content = re.sub(r'{{[^}]*date[^}]*}}', '2025-09-24', content)
+                  content = re.sub(r'{{[^}]*}}', '', content)  # Remove remaining variables
+                  
+                  # Ensure we have proper HTML structure
+                  if not content.strip().startswith('<!DOCTYPE html>') and not content.strip().startswith('<html'):
+                      # This might be a template fragment, wrap it in basic HTML
+                      content = f"""<!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>VB Healthcare</title>
+              <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+              <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+              <link rel="stylesheet" href="static/css/style.css">
+          </head>
+          <body>
+              {content}
+              <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+          </body>
+          </html>"""
+                  
+                  # Create output directory
+                  os.makedirs(os.path.dirname(output_path), exist_ok=True)
+                  
+                  # Write converted content
+                  with open(output_path, 'w', encoding='utf-8') as f:
+                      f.write(content)
+                  
+                  print(f"✓ Converted: {template_path} -> {output_path}")
+                  return True
+                  
+              except Exception as e:
+                  print(f"✗ Error converting {template_path}: {e}")
+                  return False
+          
+          # Find and convert all HTML templates
+          template_dirs = ['templates']
+          converted_count = 0
+          
+          for template_dir in template_dirs:
+              if os.path.exists(template_dir):
+                  for root, dirs, files in os.walk(template_dir):
+                      for file in files:
+                          if file.endswith('.html'):
+                              template_path = os.path.join(root, file)
+                              
+                              # Create output filename
+                              relative_path = os.path.relpath(template_path, template_dir)
+                              
+                              # Flatten directory structure and rename files
+                              if 'home.html' in file:
+                                  output_file = 'index.html'
+                              elif '/' in relative_path:
+                                  # Convert subdirectory structure to flat filenames
+                                  output_file = relative_path.replace('/', '-').replace('\\', '-')
+                              else:
+                                  output_file = file
+                              
+                              output_path = os.path.join('docs', output_file)
+                              
+                              if convert_django_template_to_static(template_path, output_path):
+                                  converted_count += 1
+          
+          print(f"\n🎉 Successfully converted {converted_count} templates to static HTML files!")
+          
+          # Create a simple index page if home.html doesn't exist
+          if not os.path.exists('docs/index.html'):
+              with open('docs/index.html', 'w') as f:
+                  f.write('''<!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>VB Healthcare Management System</title>
+              <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+              <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+          </head>
+          <body>
+              <div class="container mt-5">
+                  <div class="text-center">
+                      <h1><i class="fas fa-shield-alt text-primary"></i> VB Healthcare Management System</h1>
+                      <p class="lead">Welcome to the Healthcare Management Demo</p>
+                      <div class="row mt-4">
+                          <div class="col-md-6 mb-3">
+                              <div class="card">
+                                  <div class="card-body">
+                                      <h5 class="card-title"><i class="fas fa-user-injured"></i> Patient Portal</h5>
+                                      <p class="card-text">Access patient dashboard and services</p>
+                                      <a href="patients-dashboard.html" class="btn btn-primary">View Dashboard</a>
+                                  </div>
+                              </div>
+                          </div>
+                          <div class="col-md-6 mb-3">
+                              <div class="card">
+                                  <div class="card-body">
+                                      <h5 class="card-title"><i class="fas fa-user-md"></i> Doctor Portal</h5>
+                                      <p class="card-text">Access doctor dashboard and tools</p>
+                                      <a href="doctors-dashboard.html" class="btn btn-success">View Dashboard</a>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </body>
+          </html>''')
+              print("✓ Created default index.html")
+          
+          EOF
+          
+          # Create a navigation page listing all available pages
+          python3 << 'EOF'
+          import os
+          import glob
+          
+          html_files = glob.glob('docs/*.html')
+          html_files = [f for f in html_files if not f.endswith('navigation.html')]
+          
+          nav_content = '''<!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>All Pages - VB Healthcare</title>
+              <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+              <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+          </head>
+          <body>
+              <div class="container mt-4">
+                  <h1><i class="fas fa-sitemap"></i> All Available Pages</h1>
+                  <p class="lead">Browse all pages in the healthcare management system</p>
+                  <div class="row">
+          '''
+          
+          for html_file in sorted(html_files):
+              filename = os.path.basename(html_file)
+              display_name = filename.replace('.html', '').replace('-', ' ').title()
+              
+              icon_map = {
+                  'index': 'fas fa-home',
+                  'home': 'fas fa-home',
+                  'about': 'fas fa-info-circle',
+                  'patient': 'fas fa-user-injured',
+                  'doctor': 'fas fa-user-md',
+                  'appointment': 'fas fa-calendar',
+                  'medical': 'fas fa-file-medical',
+                  'login': 'fas fa-sign-in-alt',
+                  'register': 'fas fa-user-plus',
+                  'profile': 'fas fa-user',
+                  'dashboard': 'fas fa-tachometer-alt'
+              }
+              
+              icon = 'fas fa-file'
+              for key, ic in icon_map.items():
+                  if key in filename.lower():
+                      icon = ic
+                      break
+              
+              nav_content += f'''
+                      <div class="col-md-4 mb-3">
+                          <div class="card">
+                              <div class="card-body">
+                                  <h5 class="card-title"><i class="{icon}"></i> {display_name}</h5>
+                                  <a href="{filename}" class="btn btn-primary btn-sm">View Page</a>
+                              </div>
+                          </div>
+                      </div>
+              '''
+          
+          nav_content += '''
+                  </div>
+              </div>
+          </body>
+          </html>
+          '''
+          
+          with open('docs/navigation.html', 'w') as f:
+              f.write(nav_content)
+          
+          print("✓ Created navigation.html with links to all pages")
+          EOF
+          
+          echo "Build completed! Static site ready in docs/ directory"
+          ls -la docs/
+          
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+        
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './docs'
+          
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
