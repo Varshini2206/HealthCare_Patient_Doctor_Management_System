@@ -60,95 +60,127 @@ jobs:
           echo "Templates directory contents:"
           ls -la templates/ || echo "Templates directory not found"
           
-          # Convert Django templates to static HTML
+          # Convert Django templates to static HTML with proper template inheritance
           python3 << 'EOF'
           import os
           import re
           import shutil
           from pathlib import Path
           
-          def convert_django_template_to_static(template_path, output_path):
-              """Convert Django template to static HTML by removing Django syntax"""
+          def load_base_template():
+              """Load and process the base template"""
+              base_path = 'templates/base.html'
+              if os.path.exists(base_path):
+                  with open(base_path, 'r', encoding='utf-8') as f:
+                      base_content = f.read()
+                  
+                  # Process base template
+                  base_content = re.sub(r'{%\s*load\s+[^%]+%}', '', base_content)
+                  base_content = re.sub(r'{%\s*static\s+[\'"]([^\'"]+)[\'"]\s*%}', r'static/\1', base_content)
+                  
+                  # Replace block content placeholders
+                  base_content = re.sub(r'{%\s*block\s+title\s*%}[^{]*{%\s*endblock\s*%}', 'VB Healthcare Management System', base_content)
+                  base_content = re.sub(r'{%\s*block\s+content\s*%}[^{]*{%\s*endblock\s*%}', '<!-- CONTENT_PLACEHOLDER -->', base_content)
+                  base_content = re.sub(r'{%\s*block\s+extra_css\s*%}[^{]*{%\s*endblock\s*%}', '', base_content)
+                  base_content = re.sub(r'{%\s*block\s+extra_js\s*%}[^{]*{%\s*endblock\s*%}', '', base_content)
+                  
+                  # Clean up any remaining template syntax
+                  base_content = re.sub(r'{%[^%]*%}', '', base_content)
+                  base_content = re.sub(r'{{[^}]*user[^}]*}}', 'Demo User', base_content)
+                  base_content = re.sub(r'{{[^}]*}}', '', base_content)
+                  
+                  return base_content
+              return None
+          
+          def convert_template_with_inheritance(template_path, output_path, base_template):
+              """Convert Django template handling inheritance properly"""
               try:
                   with open(template_path, 'r', encoding='utf-8') as f:
                       content = f.read()
                   
-                  # Remove Django template tags
-                  content = re.sub(r'{%\s*load\s+[^%]+%}', '', content)
-                  content = re.sub(r'{%\s*extends\s+[^%]+%}', '', content)
-                  content = re.sub(r'{%\s*block\s+[^%]+%}', '', content)
-                  content = re.sub(r'{%\s*endblock\s*%}', '', content)
+                  # Check if this template extends base
+                  if '{% extends' in content:
+                      # Extract content from blocks
+                      title_match = re.search(r'{%\s*block\s+title\s*%}(.*?){%\s*endblock\s*%}', content, re.DOTALL)
+                      content_match = re.search(r'{%\s*block\s+content\s*%}(.*?){%\s*endblock\s*%}', content, re.DOTALL)
+                      
+                      title = title_match.group(1).strip() if title_match else 'VB Healthcare'
+                      page_content = content_match.group(1).strip() if content_match else content
+                      
+                      # Replace title in base template
+                      final_content = base_template.replace('VB Healthcare Management System', title)
+                      # Replace content placeholder
+                      final_content = final_content.replace('<!-- CONTENT_PLACEHOLDER -->', page_content)
+                  else:
+                      # Standalone template
+                      final_content = content
                   
-                  # Replace {% static %} with relative paths
-                  content = re.sub(r'{%\s*static\s+[\'"]([^\'"]+)[\'"]\s*%}', r'static/\1', content)
+                  # Process the final content
+                  final_content = re.sub(r'{%\s*load\s+[^%]+%}', '', final_content)
+                  final_content = re.sub(r'{%\s*extends\s+[^%]+%}', '', final_content)
+                  final_content = re.sub(r'{%\s*static\s+[\'"]([^\'"]+)[\'"]\s*%}', r'static/\1', final_content)
                   
-                  # Replace media URLs
-                  content = re.sub(r'{{[^}]*MEDIA_URL[^}]*}}([^"\'<>\s]+)', r'media/\1', content)
-                  
-                  # Replace common {% url %} patterns with static links
-                  url_mappings = {
+                  # Replace URL patterns with static links
+                  url_replacements = {
                       r'{%\s*url\s+[\'"]home[\'"]\s*%}': 'index.html',
                       r'{%\s*url\s+[\'"]about[\'"]\s*%}': 'about.html',
-                      r'{%\s*url\s+[\'"]accounts:login[\'"]\s*%}': 'login.html',
-                      r'{%\s*url\s+[\'"]accounts:register[\'"]\s*%}': 'register.html',
-                      r'{%\s*url\s+[\'"]accounts:profile[\'"]\s*%}': 'profile.html',
-                      r'{%\s*url\s+[\'"]patients:dashboard[\'"]\s*%}': 'patient-dashboard.html',
-                      r'{%\s*url\s+[\'"]doctors:dashboard[\'"]\s*%}': 'doctor-dashboard.html',
-                      r'{%\s*url\s+[\'"]appointments:book[\'"]\s*%}': 'book-appointment.html',
-                      r'{%\s*url\s+[\'"]appointments:list[\'"]\s*%}': 'appointments.html',
-                      r'{%\s*url\s+[\'"]medical_records:list[\'"]\s*%}': 'medical-records.html',
+                      r'{%\s*url\s+[\'"]privacy_policy[\'"]\s*%}': 'privacy_policy.html',
+                      r'{%\s*url\s+[\'"]terms_of_service[\'"]\s*%}': 'terms_of_service.html',
+                      r'{%\s*url\s+[\'"]accounts:login[\'"]\s*%}': 'accounts-login.html',
+                      r'{%\s*url\s+[\'"]accounts:register[\'"]\s*%}': 'accounts-register.html',
+                      r'{%\s*url\s+[\'"]accounts:profile[\'"]\s*%}': 'accounts-profile.html',
+                      r'{%\s*url\s+[\'"]accounts:profile_update[\'"]\s*%}': 'accounts-profile_update.html',
+                      r'{%\s*url\s+[\'"]patients:dashboard[\'"]\s*%}': 'patients-dashboard.html',
+                      r'{%\s*url\s+[\'"]patients:appointments[\'"]\s*%}': 'patients-appointments.html',
+                      r'{%\s*url\s+[\'"]patients:medical_records[\'"]\s*%}': 'patients-medical_records.html',
+                      r'{%\s*url\s+[\'"]doctors:dashboard[\'"]\s*%}': 'doctors-dashboard.html',
+                      r'{%\s*url\s+[\'"]doctors:appointments[\'"]\s*%}': 'doctors-appointments.html',
+                      r'{%\s*url\s+[\'"]doctors:patients[\'"]\s*%}': 'doctors-patients.html',
+                      r'{%\s*url\s+[\'"]appointments:book[\'"]\s*%}': 'appointments-book.html',
+                      r'{%\s*url\s+[\'"]appointments:list[\'"]\s*%}': 'appointments-list.html',
+                      r'{%\s*url\s+[\'"]medical_records:list[\'"]\s*%}': 'medical_records-list.html',
                   }
                   
-                  for pattern, replacement in url_mappings.items():
-                      content = re.sub(pattern, replacement, content)
+                  for pattern, replacement in url_replacements.items():
+                      final_content = re.sub(pattern, replacement, final_content)
                   
-                  # Remove other Django template syntax but keep the content
-                  content = re.sub(r'{%\s*csrf_token\s*%}', '', content)
-                  content = re.sub(r'{%\s*if\s+[^%]+%}', '', content)
-                  content = re.sub(r'{%\s*endif\s*%}', '', content)
-                  content = re.sub(r'{%\s*for\s+[^%]+%}', '', content)
-                  content = re.sub(r'{%\s*endfor\s*%}', '', content)
-                  content = re.sub(r'{%\s*comment\s*%}.*?{%\s*endcomment\s*%}', '', content, flags=re.DOTALL)
+                  # Remove Django template syntax
+                  final_content = re.sub(r'{%\s*csrf_token\s*%}', '', final_content)
+                  final_content = re.sub(r'{%\s*if\s+[^%]+%}', '', final_content)
+                  final_content = re.sub(r'{%\s*endif\s*%}', '', final_content)
+                  final_content = re.sub(r'{%\s*for\s+[^%]+%}', '<!-- Sample data loop -->', final_content)
+                  final_content = re.sub(r'{%\s*empty\s*%}', '<!-- No data available -->', final_content)
+                  final_content = re.sub(r'{%\s*endfor\s*%}', '<!-- End sample data -->', final_content)
+                  final_content = re.sub(r'{%\s*block\s+[^%]+%}', '', final_content)
+                  final_content = re.sub(r'{%\s*endblock\s*%}', '', final_content)
+                  final_content = re.sub(r'{%\s*comment\s*%}.*?{%\s*endcomment\s*%}', '', final_content, flags=re.DOTALL)
                   
-                  # Replace template variables with dummy content
-                  content = re.sub(r'{{[^}]*user[^}]*name[^}]*}}', 'John Patient', content)
-                  content = re.sub(r'{{[^}]*user[^}]*}}', 'Demo User', content)
-                  content = re.sub(r'{{[^}]*name[^}]*}}', 'John Doe', content)
-                  content = re.sub(r'{{[^}]*title[^}]*}}', 'Healthcare Management', content)
-                  content = re.sub(r'{{[^}]*count[^}]*}}', '5', content)
-                  content = re.sub(r'{{[^}]*total[^}]*}}', '12', content)
-                  content = re.sub(r'{{[^}]*pending[^}]*}}', '3', content)
-                  content = re.sub(r'{{[^}]*completed[^}]*}}', '8', content)
-                  content = re.sub(r'{{[^}]*date[^}]*}}', '2025-09-24', content)
-                  content = re.sub(r'{{[^}]*phone[^}]*}}', '+1 (555) 123-4567', content)
-                  content = re.sub(r'{{[^}]*email[^}]*}}', 'demo@vbhealthcare.com', content)
-                  content = re.sub(r'{{[^}]*}}', '', content)  # Remove remaining variables
-                  
-                  # Ensure we have proper HTML structure
-                  if not content.strip().startswith('<!DOCTYPE html>') and not content.strip().startswith('<html'):
-                      # This might be a template fragment, wrap it in basic HTML
-                      content = f"""<!DOCTYPE html>
-          <html lang="en">
-          <head>
-              <meta charset="UTF-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <title>VB Healthcare</title>
-              <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-              <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-              <link rel="stylesheet" href="static/css/style.css">
-          </head>
-          <body>
-              {content}
-              <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-          </body>
-          </html>"""
+                  # Replace template variables with realistic demo data
+                  final_content = re.sub(r'{{[^}]*user\.first_name[^}]*}}', 'John', final_content)
+                  final_content = re.sub(r'{{[^}]*user\.last_name[^}]*}}', 'Patient', final_content)
+                  final_content = re.sub(r'{{[^}]*user\.email[^}]*}}', 'john.patient@demo.com', final_content)
+                  final_content = re.sub(r'{{[^}]*user\.username[^}]*}}', 'johnpatient', final_content)
+                  final_content = re.sub(r'{{[^}]*user\.get_full_name[^}]*}}', 'John Patient', final_content)
+                  final_content = re.sub(r'{{[^}]*user[^}]*}}', 'Demo User', final_content)
+                  final_content = re.sub(r'{{[^}]*patient\.name[^}]*}}', 'John Patient', final_content)
+                  final_content = re.sub(r'{{[^}]*doctor\.name[^}]*}}', 'Dr. Sarah Smith', final_content)
+                  final_content = re.sub(r'{{[^}]*appointment\.date[^}]*}}', '2025-09-25', final_content)
+                  final_content = re.sub(r'{{[^}]*appointment\.time[^}]*}}', '10:00 AM', final_content)
+                  final_content = re.sub(r'{{[^}]*total_appointments[^}]*}}', '12', final_content)
+                  final_content = re.sub(r'{{[^}]*pending_appointments[^}]*}}', '3', final_content)
+                  final_content = re.sub(r'{{[^}]*completed_appointments[^}]*}}', '8', final_content)
+                  final_content = re.sub(r'{{[^}]*total_patients[^}]*}}', '25', final_content)
+                  final_content = re.sub(r'{{[^}]*phone[^}]*}}', '+1 (555) 123-4567', final_content)
+                  final_content = re.sub(r'{{[^}]*date[^}]*}}', '2025-09-24', final_content)
+                  final_content = re.sub(r'{{[^}]*count[^}]*}}', '5', final_content)
+                  final_content = re.sub(r'{{[^}]*}}', '', final_content)  # Remove any remaining variables
                   
                   # Create output directory
                   os.makedirs(os.path.dirname(output_path), exist_ok=True)
                   
-                  # Write converted content
+                  # Write the final content
                   with open(output_path, 'w', encoding='utf-8') as f:
-                      f.write(content)
+                      f.write(final_content)
                   
                   print(f"✓ Converted: {template_path} -> {output_path}")
                   return True
@@ -157,33 +189,47 @@ jobs:
                   print(f"✗ Error converting {template_path}: {e}")
                   return False
           
-          # Find and convert all HTML templates
-          template_dirs = ['templates']
+          # Load base template
+          base_template = load_base_template()
+          if not base_template:
+              print("Warning: base.html not found, using simple HTML structure")
+              base_template = """<!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>VB Healthcare</title>
+              <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+              <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+          </head>
+          <body>
+          <!-- CONTENT_PLACEHOLDER -->
+          <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+          </body>
+          </html>"""
+          
+          # Convert all templates
           converted_count = 0
           
-          for template_dir in template_dirs:
-              if os.path.exists(template_dir):
-                  for root, dirs, files in os.walk(template_dir):
-                      for file in files:
-                          if file.endswith('.html'):
-                              template_path = os.path.join(root, file)
-                              
-                              # Create output filename
-                              relative_path = os.path.relpath(template_path, template_dir)
-                              
-                              # Flatten directory structure and rename files
-                              if 'home.html' in file:
-                                  output_file = 'index.html'
-                              elif '/' in relative_path:
-                                  # Convert subdirectory structure to flat filenames
-                                  output_file = relative_path.replace('/', '-').replace('\\', '-')
-                              else:
-                                  output_file = file
-                              
-                              output_path = os.path.join('docs', output_file)
-                              
-                              if convert_django_template_to_static(template_path, output_path):
-                                  converted_count += 1
+          if os.path.exists('templates'):
+              for root, dirs, files in os.walk('templates'):
+                  for file in files:
+                      if file.endswith('.html') and file != 'base.html' and file != 'base_simple.html':
+                          template_path = os.path.join(root, file)
+                          
+                          # Create meaningful output filename
+                          relative_path = os.path.relpath(template_path, 'templates')
+                          
+                          if file == 'home.html':
+                              output_file = 'index.html'
+                          else:
+                              # Convert subdirectory/filename.html to subdirectory-filename.html
+                              output_file = relative_path.replace('/', '-').replace('\\', '-')
+                          
+                          output_path = os.path.join('docs', output_file)
+                          
+                          if convert_template_with_inheritance(template_path, output_path, base_template):
+                              converted_count += 1
           
           print(f"\n🎉 Successfully converted {converted_count} templates to static HTML files!")
           
@@ -232,7 +278,7 @@ jobs:
           
           EOF
           
-          # Create a navigation page listing all available pages
+          # Create an enhanced navigation page listing all available pages
           python3 << 'EOF'
           import os
           import glob
@@ -240,60 +286,157 @@ jobs:
           html_files = glob.glob('docs/*.html')
           html_files = [f for f in html_files if not f.endswith('navigation.html')]
           
+          # Categorize pages for better organization
+          page_categories = {
+              'Main Pages': ['index.html', 'about.html', 'privacy_policy.html', 'terms_of_service.html'],
+              'Patient Portal': [f for f in html_files if 'patients-' in os.path.basename(f)],
+              'Doctor Portal': [f for f in html_files if 'doctors-' in os.path.basename(f)],
+              'Appointments': [f for f in html_files if 'appointment' in os.path.basename(f)],
+              'Medical Records': [f for f in html_files if 'medical' in os.path.basename(f)],
+              'User Accounts': [f for f in html_files if 'accounts-' in os.path.basename(f)],
+              'Other Pages': []
+          }
+          
+          # Collect uncategorized pages
+          categorized_files = set()
+          for category_files in page_categories.values():
+              categorized_files.update([os.path.basename(f) for f in category_files])
+          
+          for html_file in html_files:
+              filename = os.path.basename(html_file)
+              if filename not in categorized_files and filename not in page_categories['Main Pages']:
+                  page_categories['Other Pages'].append(html_file)
+          
           nav_content = '''<!DOCTYPE html>
           <html lang="en">
           <head>
               <meta charset="UTF-8">
               <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <title>All Pages - VB Healthcare</title>
+              <title>VB Healthcare - All Pages</title>
               <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
               <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+              <style>
+                  :root {
+                      --vb-primary: #2c5aa0;
+                      --vb-secondary: #4a90e2;
+                  }
+                  body { background-color: #f8f9fa; }
+                  .navbar-brand { color: var(--vb-primary) !important; font-weight: bold; }
+                  .category-card { border-left: 4px solid var(--vb-primary); }
+                  .page-card { transition: transform 0.3s ease; }
+                  .page-card:hover { transform: translateY(-5px); }
+              </style>
           </head>
           <body>
-              <div class="container mt-4">
-                  <h1><i class="fas fa-sitemap"></i> All Available Pages</h1>
-                  <p class="lead">Browse all pages in the healthcare management system</p>
-                  <div class="row">
+              <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-4">
+                  <div class="container">
+                      <a class="navbar-brand" href="index.html">
+                          <i class="fas fa-shield-alt text-success"></i> VB HealthCare
+                      </a>
+                      <div class="navbar-nav ms-auto">
+                          <a class="nav-link" href="index.html">Home</a>
+                          <a class="nav-link" href="about.html">About</a>
+                      </div>
+                  </div>
+              </nav>
+          
+              <div class="container">
+                  <div class="text-center mb-5">
+                      <h1><i class="fas fa-sitemap text-primary"></i> Healthcare Management System Demo</h1>
+                      <p class="lead">Explore all pages of the VB Healthcare Management System</p>
+                      <div class="alert alert-info">
+                          <i class="fas fa-info-circle"></i> 
+                          <strong>Demo Note:</strong> All pages are accessible without login for demonstration purposes.
+                          In the full system, authentication would be required for patient and doctor portals.
+                      </div>
+                  </div>
           '''
           
-          for html_file in sorted(html_files):
-              filename = os.path.basename(html_file)
-              display_name = filename.replace('.html', '').replace('-', ' ').title()
-              
-              icon_map = {
-                  'index': 'fas fa-home',
-                  'home': 'fas fa-home',
-                  'about': 'fas fa-info-circle',
-                  'patient': 'fas fa-user-injured',
-                  'doctor': 'fas fa-user-md',
-                  'appointment': 'fas fa-calendar',
-                  'medical': 'fas fa-file-medical',
-                  'login': 'fas fa-sign-in-alt',
-                  'register': 'fas fa-user-plus',
-                  'profile': 'fas fa-user',
-                  'dashboard': 'fas fa-tachometer-alt'
-              }
-              
-              icon = 'fas fa-file'
-              for key, ic in icon_map.items():
+          # Icon mapping for different page types
+          icon_map = {
+              'index': 'fas fa-home',
+              'about': 'fas fa-info-circle',
+              'privacy': 'fas fa-shield-alt',
+              'terms': 'fas fa-file-contract',
+              'patients-dashboard': 'fas fa-tachometer-alt',
+              'patients-appointments': 'fas fa-calendar-check',
+              'patients-medical': 'fas fa-file-medical-alt',
+              'doctors-dashboard': 'fas fa-stethoscope',
+              'doctors-appointments': 'fas fa-calendar-alt',
+              'doctors-patients': 'fas fa-users',
+              'accounts-login': 'fas fa-sign-in-alt',
+              'accounts-register': 'fas fa-user-plus',
+              'accounts-profile': 'fas fa-user-circle',
+              'appointment': 'fas fa-calendar',
+              'medical': 'fas fa-file-medical'
+          }
+          
+          def get_icon(filename):
+              for key, icon in icon_map.items():
                   if key in filename.lower():
-                      icon = ic
-                      break
-              
-              nav_content += f'''
-                      <div class="col-md-4 mb-3">
-                          <div class="card">
+                      return icon
+              return 'fas fa-file-alt'
+          
+          def get_display_name(filename):
+              name = filename.replace('.html', '').replace('-', ' ')
+              # Special cases for better naming
+              if 'patients-dashboard' in filename:
+                  return 'Patient Dashboard'
+              elif 'doctors-dashboard' in filename:
+                  return 'Doctor Dashboard'
+              elif 'accounts-' in filename:
+                  return name.replace('accounts ', '').title()
+              return name.title()
+          
+          for category, files in page_categories.items():
+              if files:  # Only show categories that have files
+                  nav_content += f'''
+                  <div class="row mb-4">
+                      <div class="col-12">
+                          <div class="card category-card">
+                              <div class="card-header bg-light">
+                                  <h4 class="mb-0 text-primary">{category}</h4>
+                              </div>
                               <div class="card-body">
-                                  <h5 class="card-title"><i class="{icon}"></i> {display_name}</h5>
-                                  <a href="{filename}" class="btn btn-primary btn-sm">View Page</a>
+                                  <div class="row">
+                  '''
+                  
+                  for html_file in sorted(files):
+                      filename = os.path.basename(html_file)
+                      display_name = get_display_name(filename)
+                      icon = get_icon(filename)
+                      
+                      nav_content += f'''
+                                      <div class="col-md-4 col-lg-3 mb-3">
+                                          <div class="card page-card h-100">
+                                              <div class="card-body text-center">
+                                                  <i class="{icon} fa-2x text-primary mb-2"></i>
+                                                  <h6 class="card-title">{display_name}</h6>
+                                                  <a href="{filename}" class="btn btn-primary btn-sm">
+                                                      <i class="fas fa-eye"></i> View Page
+                                                  </a>
+                                              </div>
+                                          </div>
+                                      </div>
+                      '''
+                  
+                  nav_content += '''
+                                  </div>
                               </div>
                           </div>
                       </div>
-              '''
+                  </div>
+                  '''
           
           nav_content += '''
-                  </div>
               </div>
+              
+              <footer class="bg-dark text-white text-center py-4 mt-5">
+                  <div class="container">
+                      <p class="mb-0">© 2025 Venkat Buthuru. All rights reserved.</p>
+                      <p class="mb-0">VB Healthcare Management System - Demo Version</p>
+                  </div>
+              </footer>
           </body>
           </html>
           '''
@@ -301,7 +444,7 @@ jobs:
           with open('docs/navigation.html', 'w') as f:
               f.write(nav_content)
           
-          print("✓ Created navigation.html with links to all pages")
+          print("✓ Created enhanced navigation.html with categorized page links")
           EOF
           
           # Create a README for the docs folder
