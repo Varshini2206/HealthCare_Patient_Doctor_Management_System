@@ -151,3 +151,16 @@ dump.rdb
 # Local development settings
 local.py
 settings_local.py
+
+# Demo Screenshots Folder
+HealthCare Patient and Doctor Demo/
+"HealthCare Patient and Doctor Demo"/
+
+# Interview Preparation Files - Do not push to repository
+*_INTERVIEW_QA.md
+DATABASE_ARCHITECTURE.md
+API_REST_INTERVIEW_QA.md
+DATABASE_INTERVIEW_QA.md
+DJANGO_INTERVIEW_QA.md
+FRONTEND_INTEGRATION_INTERVIEW_QA.md
+SYSTEM_DESIGN_INTERVIEW_QA.md
