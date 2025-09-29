@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}VB Healthcare Management System{% endblock %}</title>
+    <title>{% block title %}Mouni Varshini Healthcare Management System{% endblock %}</title>
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -14,31 +14,31 @@
     <!-- Custom CSS -->
     <style>
         :root {
-            --vb-primary: #2c5aa0;
-            --vb-secondary: #4a90e2;
-            --vb-success: #28a745;
-            --vb-danger: #dc3545;
-            --vb-warning: #ffc107;
-            --vb-info: #17a2b8;
-            --vb-light: #f8f9fa;
-            --vb-dark: #343a40;
-            --vb-gradient-primary: linear-gradient(135deg, #2c5aa0 0%, #4a90e2 100%);
-            --vb-gradient-success: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            --mv-primary: #2c5aa0;
+            --mv-secondary: #4a90e2;
+            --mv-success: #28a745;
+            --mv-danger: #dc3545;
+            --mv-warning: #ffc107;
+            --mv-info: #17a2b8;
+            --mv-light: #f8f9fa;
+            --mv-dark: #343a40;
+            --mv-gradient-primary: linear-gradient(135deg, #2c5aa0 0%, #4a90e2 100%);
+            --mv-gradient-success: linear-gradient(135deg, #28a745 0%, #20c997 100%);
         }
         
         body {
-            background-color: var(--vb-light);
+            background-color: var(--mv-light);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         .navbar-brand {
             font-weight: bold;
-            color: var(--vb-primary) !important;
+            color: var(--mv-primary) !important;
             font-size: 1.5rem;
         }
         
         .navbar-brand .fa-shield-alt {
-            color: var(--vb-success);
+            color: var(--mv-success);
         }
         
         .navbar {
@@ -86,7 +86,7 @@
         
         .profile-name {
             font-weight: 600;
-            color: var(--vb-primary);
+            color: var(--mv-primary);
             margin-right: 5px;
         }
         
@@ -114,24 +114,24 @@
         }
         
         .btn-primary {
-            background: var(--vb-gradient-primary);
+            background: var(--mv-gradient-primary);
             border: none;
             border-radius: 8px;
             font-weight: 500;
         }
         
         .btn-primary:hover {
-            background: var(--vb-secondary);
+            background: var(--mv-secondary);
             transform: translateY(-2px);
             transition: all 0.3s ease;
         }
         
         .bg-gradient-primary {
-            background: var(--vb-gradient-primary) !important;
+            background: var(--mv-gradient-primary) !important;
         }
         
         .bg-gradient-success {
-            background: var(--vb-gradient-success) !important;
+            background: var(--mv-gradient-success) !important;
         }
         
         .trust-badge {
@@ -139,7 +139,7 @@
             align-items: center;
             padding: 0.25rem 0.5rem;
             background: rgba(40, 167, 69, 0.1);
-            color: var(--vb-success);
+            color: var(--mv-success);
             border-radius: 20px;
             font-size: 0.75rem;
             margin: 0.125rem;
@@ -152,7 +152,7 @@
         }
         
         .footer-link:hover {
-            color: var(--vb-primary);
+            color: var(--mv-primary);
         }
     </style>
     
@@ -194,7 +194,7 @@
         <div class="container">
             <a class="navbar-brand" href="{% url 'home' %}">
                 <i class="fas fa-shield-alt"></i> 
-                <span class="fw-bold">VB Healthcare</span>
+                <span class="fw-bold">Mouni Varshini Healthcare</span>
                 <small class="d-block" style="font-size: 0.6rem; line-height: 1;">Trusted Care</small>
             </a>
             
@@ -317,7 +317,7 @@
                     <div class="mb-3">
                         <h5 class="fw-bold">
                             <i class="fas fa-shield-alt text-success"></i> 
-                            VB Healthcare
+                            Mouni Varshini Healthcare
                         </h5>
                         <p class="text-muted">
                             Leading healthcare technology platform providing secure, 
@@ -414,7 +414,7 @@
                             <i class="fas fa-envelope text-warning me-2"></i>
                             <div>
                                 <strong>Email:</strong> 
-                                <a href="mailto:support@vbhealthcare.com" class="footer-link">support@vbhealthcare.com</a>
+                                <a href="mailto:support@mounivarshini.com" class="footer-link">support@mounivarshini.com</a>
                             </div>
                         </div>
                     </div>
@@ -457,7 +457,7 @@
                     <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center">
                         <div class="me-md-4 mb-2 mb-md-0">
                             <p class="mb-0 small text-muted">
-                                <strong>© 2025 VB Healthcare Management System.</strong> All rights reserved.
+                                <strong>© 2025 Mouni Varshini Healthcare Management System.</strong> All rights reserved.
                             </p>
                         </div>
                         <div class="me-md-4 mb-2 mb-md-0">
