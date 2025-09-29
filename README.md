@@ -2,7 +2,13 @@ HealthCare Patient Management System
 
 A comprehensive healthcare management platform built with Django that facilitates seamless interaction between patients and doctors. This system provides a complete solution for appointment scheduling, medical record management, prescription handling, and patient care coordination.
 
-Deployment Link : 
+Deployment Link : https://healthcare-patient-doctor-management.onrender.com/
+
+Render Free Tier Database Limitation
+
+This project is deployed on **Render's free tier**. The associated PostgreSQL database has a limited lifespan and will be **automatically deleted 30 days after its creation date**.
+
+* **Creation Date:** Sep 30, 2025
 
 Project Overview
 
